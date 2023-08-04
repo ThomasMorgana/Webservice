@@ -1,58 +1,45 @@
-import Car from "../models/car.model";
-import carRoutes from "../routes/car.routes";
+import { Car } from "../models/car.model";
+import { Prisma, PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 interface ICarRepository {
-  save(car: Car): Car;
-  retrieveAll(): Car[];
-  retrieveById(carId: number): Car | null;
-  update(car: Car): Car;
-  delete(carId: number): boolean;
+    save(car: Car): Promise<Car>;
+    retrieveAll(): Promise<Car[]>;
+    retrieveById(carId: number): Promise<Car | null>;
+    update(car: Car): Promise<Car>;
+    delete(carId: number): Promise<number>;
 }
 
 class CarRepository implements ICarRepository {
 
-    cars: Car[] = [{id:1, model:'307', brand: 'Peugeot', year:2020}]
+    cars: Car[] = []
 
     
-    save(car: Car): Car {
-        car.id = this.cars.length+1
-        this.cars.push(car)
-        return car
+    async save(car: Car): Promise<Car> {
+        return await prisma.car.create({data: { 
+            ...car
+        }})
     }
 
-    retrieveAll(): Car[] {
-        return this.cars;
+    async retrieveAll(): Promise<Car[]> {
+        return await prisma.car.findMany();
     }
 
-    retrieveById(carId: number): Car | null {
-        return this.cars.find((car) => car.id === carId) ?? null 
+    async retrieveById(id: number): Promise<Car | null> {
+        return await prisma.car.findUnique({where: {id: id}})
     }
 
-    update(carPayload: Car): Car {
-        const carIndex = this.cars.findIndex((car) => car.id === carPayload.id);
-
-        if(carIndex === -1) {
-            // if the car does not exists, we create it. Other option is to send a 404.
-            this.cars.push(carPayload)
-        } else {
-            this.cars[carIndex] = carPayload 
-        }
-        
-        return carPayload;
+    async update(car: Car): Promise<Car> {
+        return await prisma.car.update({
+            where: { id: car.id },
+            data: { ...car },
+        });
     }
 
-    delete(carId: number): boolean {
-        const carIndex = this.cars.findIndex((car) => car.id === carId);
-      
-        if(carIndex != -1) {
-            this.cars.splice(carIndex, 1)
-        }
-        
-        return true;
-    }
-   
+    async delete(id: number): Promise<number> {
+        return (await prisma.car.delete({where: {id: id}, select: {id: true}})).id
+    } 
 }
-
-
 
 export default new CarRepository();
