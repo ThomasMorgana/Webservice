@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import carRepository from "../services/car.services";
-import { Car } from "../models/car.model";
-import { Prisma } from "@prisma/client";
+import { Prisma, Car } from "@prisma/client";
+import Pagination from "../types/pagination.type";
 
 export default class TutorialController {
 
@@ -24,9 +24,9 @@ export default class TutorialController {
     }
   }
 
-  async findAll(req: Request, res: Response) {
+  async findAll(req: Request, res: Response) {    
     try {
-      const cars = await carRepository.retrieveAll()
+      const cars = await carRepository.retrieveAll(req.query as Pagination)
       res.status(200).send(cars)
     } catch (error) {
       res.status(500).send({
