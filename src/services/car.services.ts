@@ -1,11 +1,11 @@
-import { Car } from "../models/car.model";
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Car } from '@prisma/client'
+import Pagination from '../types/pagination.type';
 
 const prisma = new PrismaClient()
 
 interface ICarRepository {
     save(car: Car): Promise<Car>;
-    retrieveAll(): Promise<Car[]>;
+    retrieveAll(pagination?: Pagination): Promise<Car[]>;
     retrieveById(carId: number): Promise<Car | null>;
     update(car: Car): Promise<Car>;
     delete(carId: number): Promise<number>;
@@ -19,8 +19,14 @@ class CarRepository implements ICarRepository {
         }})
     }
 
-    async retrieveAll(): Promise<Car[]> {
-        return await prisma.car.findMany();
+    async retrieveAll(pagination?: Pagination): Promise<Car[]> {
+        if(pagination?.page) {
+            const page = pagination.page ?? 0
+            const step = pagination.step ?? 10
+            return await prisma.car.findMany({take: +step, skip: +step * +page, orderBy: {id: "asc"}} );
+        } else {
+            return await prisma.car.findMany();
+        }
     }
 
     async retrieveById(id: number): Promise<Car | null> {
