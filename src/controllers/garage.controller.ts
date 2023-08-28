@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import carService from "../services/car.services";
-import { Prisma, Car } from "@prisma/client";
+import garageService from "../services/garage.services";
+import { Prisma, Garage } from "@prisma/client";
 import Pagination from "../interfaces/pagination.interface";
 import { AuthenticatedRequest } from "../interfaces/auth.interface";
 
-export default class CarController {
+export default class GarageController {
 
   async create(req: Request, res: Response) {
     if (!req.body) {
@@ -15,24 +15,24 @@ export default class CarController {
         return;
     }
     try {
-        const car: Car = req.body;
-        car.userId = (req as AuthenticatedRequest).token.id;
-        const savedCar = await carService.save(car)
-        res.status(201).send(savedCar)
+        const garage: Garage = req.body
+        garage.userId = (req as AuthenticatedRequest).token.id;
+        const savedGarage = await garageService.save(req.body)
+        res.status(201).send(savedGarage)
     } catch (error) {
         res.status(500).send({
-          message: "Internal Server Error! Something went wrong while creating the car"
+          message: "Internal Server Error!"
         });
     }
   }
 
   async findAll(req: Request, res: Response) {    
     try {
-      const cars = await carService.retrieveAll(req.query as Pagination)
-      res.status(200).send(cars)
+      const garages = await garageService.retrieveAll(req.query as Pagination)
+      res.status(200).send(garages)
     } catch (error) {
       res.status(500).send({
-        message: "Internal Server Error! Something went wrong getting the cars"
+        message: "Internal Server Error!"
       });
     }
   }
@@ -40,8 +40,8 @@ export default class CarController {
   async findOne(req: Request, res: Response) {
     const id: number = parseInt(req.params.id);
     try {
-        const car = await carService.retrieveById(id)
-        res.status(car ? 200 : 400).send(car ? car : `Car with id=${id} not found` )
+        const garage = await garageService.retrieveById(id)
+        res.status(garage ? 200 : 400).send(garage ? garage : `Garage with id=${id} not found` )
     } catch (error) {
       res.status(500).send({
         message: "Internal Server Error!"
@@ -50,18 +50,18 @@ export default class CarController {
   }
 
   async update(req: Request, res: Response) {
-    let carToUpdate: Car = req.body;
-    carToUpdate.id = parseInt(req.params.id);
+    let garageToUpdate: Garage = req.body;
+    garageToUpdate.id = parseInt(req.params.id);
     try {
-      const car = await carService.update(carToUpdate)
-      res.status(200).send(car)
+      const garage = await garageService.update(garageToUpdate)
+      res.status(200).send(garage)
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === "P2025"
     ) {
       res.status(404).send({
-        message: `Car with id=${carToUpdate.id} not found`
+        message: `Garage with id=${garageToUpdate.id} not found`
       });
     } else {
       res.status(500).send({
@@ -74,9 +74,9 @@ export default class CarController {
   async delete(req: Request, res: Response) {
     const id: number = parseInt(req.params.id);
     try {
-      await carService.delete(id)
+      await garageService.delete(id)
       res.status(200).send({
-        message: `Car with id=${id} deleted`
+        message: `Garage with id=${id} deleted`
       });
     } catch (error) {
       if (
@@ -84,7 +84,7 @@ export default class CarController {
         error.code === "P2025"
       ) {
         res.status(404).send({
-          message: `Car with id=${id} not found`
+          message: `Garage with id=${id} not found`
         });
       } else {
         res.status(500).send({

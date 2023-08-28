@@ -1,5 +1,5 @@
 import { PrismaClient, Car } from '@prisma/client'
-import Pagination from '../types/pagination.type';
+import Pagination from '../interfaces/pagination.interface';
 
 const prisma = new PrismaClient()
 
@@ -14,9 +14,13 @@ interface ICarRepository {
 class CarRepository implements ICarRepository {
     
     async save(car: Car): Promise<Car> {
-        return await prisma.car.create({data: { 
-            ...car
-        }})
+        return await prisma.car.create({
+            data: { 
+                model: car.model,
+                brand: car.brand,
+                year: car.year,
+                user: { connect: { id : car.userId}}
+            }})
     }
 
     async retrieveAll(pagination?: Pagination): Promise<Car[]> {
