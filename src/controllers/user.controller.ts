@@ -35,7 +35,7 @@ export default class UserController {
     try {
         const user: User = req.body
         const currentUserRole: Role = (req as AuthenticatedRequest).role;
-
+        
         if(currentUserRole != Role.ADMIN) {
           res.status(403).send({
             message: "You must be an Admin to create an Admin"
