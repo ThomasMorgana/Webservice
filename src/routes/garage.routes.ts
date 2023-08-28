@@ -1,10 +1,10 @@
 import { Router } from "express";
-import CarController from "../controllers/car.controller";
+import GarageController from "../controllers/garage.controller";
 import { authenticateToken } from "../middlewares/auth.middleware";
 
-class CarRoutes {
+class GarageRoutes {
   router = Router();
-  controller = new CarController();
+  controller = new GarageController();
 
   constructor() {
     this.intializeRoutes();
@@ -23,4 +23,4 @@ class CarRoutes {
   }
 }
 
-export default new CarRoutes().router;
+export default new GarageRoutes().router;
