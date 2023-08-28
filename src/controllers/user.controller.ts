@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import userService from "../services/user.services";
-import { Prisma, User } from "@prisma/client";
+import { Prisma, Role, User } from "@prisma/client";
 import Pagination from "../interfaces/pagination.interface";
+import { AuthenticatedRequest } from "../interfaces/auth.interface";
 
 export default class UserController {
   
@@ -16,6 +17,34 @@ export default class UserController {
     try {
         const user: User = req.body
         const savedUser = await userService.register(req.body)
+        res.status(201).send(savedUser)
+    } catch (error) {
+        res.status(500).send({
+          message: "Internal Server Error!"
+        });
+    }
+  }
+
+  async createAdmin(req: Request, res: Response) {
+    if (!req.body) {
+        res.status(400).send({
+            message: "Content can not be empty!"
+        });
+        return;
+    }
+    try {
+        const user: User = req.body
+        const currentUserRole: Role = (req as AuthenticatedRequest).role;
+
+        if(currentUserRole != Role.ADMIN) {
+          res.status(403).send({
+            message: "You must be an Admin to create an Admin"
+          });
+          return;
+        } 
+
+        user.role = Role.ADMIN
+        const savedUser = await userService.register(user)
         res.status(201).send(savedUser)
     } catch (error) {
         res.status(500).send({
