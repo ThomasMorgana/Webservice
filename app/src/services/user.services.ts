@@ -1,9 +1,9 @@
-import { PrismaClient, Prisma, User } from '@prisma/client'
+import { PrismaClient, Prisma, User } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import bcrypt from 'bcrypt';
 import { IncorrectPasswordError, MailAlreadyUsedError, MailNotFoundError } from '../errors/auth.error';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 interface IUserService {
   login(user: User): Promise<User | null>;
@@ -16,54 +16,54 @@ interface IUserService {
 
 class UserService implements IUserService {
 
-  async login(credentials: Prisma.UserCreateInput): Promise<User | null> {
+	async login(credentials: Prisma.UserCreateInput): Promise<User | null> {
     
-    const user = await prisma.user.findUnique({where: {
-      email: credentials.email
-    }})
+		const user = await prisma.user.findUnique({where: {
+			email: credentials.email
+		}});
 
-    if(!user) throw new MailNotFoundError();
-    if(!bcrypt.compareSync(credentials.password, user.password)) throw new IncorrectPasswordError();
+		if(!user) throw new MailNotFoundError();
+		if(!bcrypt.compareSync(credentials.password, user.password)) throw new IncorrectPasswordError();
 
-    return user;
-  }
+		return user;
+	}
 
-  async register(credentials: Prisma.UserCreateInput): Promise<User> {
-    const user = await prisma.user.findUnique({where: {
-      email: credentials.email
-    }})
+	async register(credentials: Prisma.UserCreateInput): Promise<User> {
+		const user = await prisma.user.findUnique({where: {
+			email: credentials.email
+		}});
     
-    if(user) throw new MailAlreadyUsedError()
+		if(user) throw new MailAlreadyUsedError();
     
-    return  await prisma.user.create({data: { 
-      ...credentials
-    }})
-  }
+		return  await prisma.user.create({data: { 
+			...credentials
+		}});
+	}
 
-  async retrieveAll(pagination?: Pagination): Promise<User[]> {
-    if(pagination?.page) {
-      const page = pagination.page ?? 0
-      const step = pagination.step ?? 10
-      return await prisma.user.findMany({take: +step, skip: +step * +page, orderBy: {id: "asc"}} );
-    } else {
-      return await prisma.user.findMany();
-    }
-  }
+	async retrieveAll(pagination?: Pagination): Promise<User[]> {
+		if(pagination?.page) {
+			const page = pagination.page ?? 0;
+			const step = pagination.step ?? 10;
+			return await prisma.user.findMany({take: +step, skip: +step * +page, orderBy: {id: 'asc'}} );
+		} else {
+			return await prisma.user.findMany();
+		}
+	}
 
-  async retrieveById(id: string): Promise<User | null> {
-    return await prisma.user.findUnique({where: {id: id}})
-  }
+	async retrieveById(id: string): Promise<User | null> {
+		return await prisma.user.findUnique({where: {id: id}});
+	}
 
-  async update(user: User): Promise<User> {
-    return await prisma.user.update({
-      where: { id: user.id },
-      data: { ...user },
-    });
-  }
+	async update(user: User): Promise<User> {
+		return await prisma.user.update({
+			where: { id: user.id },
+			data: { ...user },
+		});
+	}
 
-  async delete(id: string): Promise<string> {
-    return (await prisma.user.delete({where: {id: id}, select: {id: true}})).id
-  } 
+	async delete(id: string): Promise<string> {
+		return (await prisma.user.delete({where: {id: id}, select: {id: true}})).id;
+	} 
 }
 
 export default new UserService();
