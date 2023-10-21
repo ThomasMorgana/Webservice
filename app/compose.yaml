@@ -1,0 +1,26 @@
+services:
+  webservice:
+    image: node:18-alpine
+    restart: always
+    command: sh -c "npm install && npx prisma generate && npx prisma migrate deploy && npm run seed && npm run start"
+    ports:
+      - 8082:8082
+    working_dir: /app
+    volumes:
+      - ./:/app
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DB: "${MYSQL_DATABASE}"
+
+  mysql:
+    image: mysql:8.0
+    volumes:
+      - webservice-mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+
+volumes:
+  webservice-mysql-data:

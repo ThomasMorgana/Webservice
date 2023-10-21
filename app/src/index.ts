@@ -1,6 +1,6 @@
 import express, { Application } from "express";
-import cors, { CorsOptions } from "cors";
 import Routes from "./routes";
+import { rateLimit } from 'express-rate-limit'
 
 export default class Server {
   constructor(app: Application) {
@@ -9,12 +9,16 @@ export default class Server {
   }
 
   private config(app: Application): void {
-    const corsOptions: CorsOptions = {
-      origin: "http://localhost:8081"
-    };
+    const limiter = rateLimit({
+      windowMs: 1 * 60 * 1000,
+      limit: 10,
+      standardHeaders: 'draft-7',
+      message: "Leave me alone now !",
+      legacyHeaders: false, 
+    })
 
-    app.use(cors(corsOptions));
     app.use(express.json());
+    app.use(limiter)
     app.use(express.urlencoded({ extended: true }));
   }
 }
