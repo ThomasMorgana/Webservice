@@ -6,7 +6,7 @@ new Server(app);
 const PORT: number = process.env.PORT ? parseInt(process.env.PORT, 10) : 8082;
 
 app
-	.listen(PORT, 'localhost', function () {
+	.listen(PORT, function () {
 		console.log(`Server is running on port ${PORT}.`);
 	})
 	.on('error', () => {
