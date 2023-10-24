@@ -13,11 +13,18 @@ services:
       MYSQL_USER: root
       MYSQL_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
       MYSQL_DB: "${MYSQL_DATABASE}"
+    depends_on:
+      mysql:
+        condition: service_healthy
 
   mysql:
     image: mysql:8.0
     volumes:
       - webservice-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 12
     environment:
       MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
       MYSQL_DATABASE: "${MYSQL_DATABASE}"

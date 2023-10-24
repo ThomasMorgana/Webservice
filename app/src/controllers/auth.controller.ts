@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import userService from '../services/user.services';
-import bcrypt from 'bcrypt';
+import bcryptjs from 'bcryptjs';
 import { RefreshToken } from '@prisma/client';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt';
 import jwt from 'jsonwebtoken';
@@ -45,7 +45,7 @@ export default class AuthController {
 
 			if(!req.body.password || !req.body.email) res.status(401).send();
       
-			const hashedPassword = await bcrypt.hash(req.body.password, 12);
+			const hashedPassword = await bcryptjs.hash(req.body.password, 12);
 			const user = await userService.register({email: req.body.email, password: hashedPassword});
       
 			const accessToken = generateAccessToken(user);

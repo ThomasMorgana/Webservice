@@ -1,6 +1,6 @@
 import { PrismaClient, Role } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-import bcrypt from 'bcrypt';
+import bcryptjs from 'bcryptjs';
 
 
 export const seedUsers = async (prisma: PrismaClient) => {
@@ -12,7 +12,7 @@ export const seedUsers = async (prisma: PrismaClient) => {
 		data: {
 			email: 'admin@mail.com',
 			role: Role.ADMIN,
-			password: await bcrypt.hash('password', 12),
+			password: await bcryptjs.hash('password', 12),
 		}
 	});
   
@@ -22,7 +22,7 @@ export const seedUsers = async (prisma: PrismaClient) => {
 		await prisma.user.create({
 			data: {
 				email: faker.internet.email(),
-				password: await bcrypt.hash('password', 12),
+				password: await bcryptjs.hash('password', 12),
 			}
 		});
 	}

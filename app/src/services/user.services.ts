@@ -1,6 +1,6 @@
 import { PrismaClient, Prisma, User } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
-import bcrypt from 'bcrypt';
+import bcryptjs from 'bcryptjs';
 import { IncorrectPasswordError, MailAlreadyUsedError, MailNotFoundError } from '../errors/auth.error';
 
 const prisma = new PrismaClient();
@@ -23,7 +23,7 @@ class UserService implements IUserService {
 		}});
 
 		if(!user) throw new MailNotFoundError();
-		if(!bcrypt.compareSync(credentials.password, user.password)) throw new IncorrectPasswordError();
+		if(!bcryptjs.compareSync(credentials.password, user.password)) throw new IncorrectPasswordError();
 
 		return user;
 	}
