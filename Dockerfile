@@ -3,9 +3,8 @@ WORKDIR /app
 EXPOSE 8082
 
 FROM base as dev
-CMD npm install && npx prisma generate && npx prisma migrate deploy && npm run seed && npm start
+CMD npm run docker:dev
 
 FROM base as prod
 COPY . .
-RUN npm install --production
-CMD npx prisma generate && npx prisma migrate deploy && npm start
+CMD npm run docker:prod
