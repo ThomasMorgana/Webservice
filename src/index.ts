@@ -13,7 +13,7 @@ export default class Server {
 			windowMs: 1 * 60 * 1000,
 			limit: 10,
 			standardHeaders: 'draft-7',
-			message: 'Leave me alone now !',
+			message: 'Leave me alone now!',
 			legacyHeaders: false, 
 		});
 
