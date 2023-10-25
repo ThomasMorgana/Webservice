@@ -1,0 +1,35 @@
+services:
+  webservice:
+    build:
+      dockerfile: Dockerfile
+      target: dev
+    image: node:18-alpine
+    restart: always
+    ports:
+      - ${PORT}:${PORT}
+    working_dir: /app
+    volumes:
+      - ./:/app
+    environment:
+      MYSQL_HOST: "${MYSQL_HOST}"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DB: "${MYSQL_DATABASE}"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.0
+    volumes:
+      - webservice-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 12
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+
+volumes:
+  webservice-mysql-data:
