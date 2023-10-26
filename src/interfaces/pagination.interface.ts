@@ -1,4 +1,6 @@
-export default interface Pagination {
-  page?: number
-  step?: number
-};
+interface Pagination {
+  page?: number;
+  step?: number;
+}
+
+export default Pagination;
