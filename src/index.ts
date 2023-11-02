@@ -1,6 +1,7 @@
 import express, { Application } from 'express';
 import Routes from './routes';
 import { rateLimit } from 'express-rate-limit';
+import { logRequest } from './utils/logger';
 
 export default class Server {
   constructor(app: Application) {
@@ -19,6 +20,7 @@ export default class Server {
 
     app.use(express.json());
     app.use(limiter);
+    app.use(logRequest);
     app.use(express.urlencoded({ extended: true }));
   }
 }
