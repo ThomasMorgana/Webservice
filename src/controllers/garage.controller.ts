@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import garageService from '../services/garage.services';
+import garageService from '../services/garage.service';
 import { Prisma, Garage } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import { AuthenticatedRequest } from '../interfaces/auth.interface';

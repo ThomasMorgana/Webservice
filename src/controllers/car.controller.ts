@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import carService from '../services/car.services';
+import carService from '../services/car.service';
 import { Prisma, Car } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import { AuthenticatedRequest } from '../interfaces/auth.interface';
