@@ -1,6 +1,6 @@
 import { User } from '@prisma/client';
 
-export const welcomeUser = (user: User) => {
+export const resetPassword = (user: User, token: string) => {
   return {
     subject: `Welcome !`,
     content: `
@@ -38,7 +38,7 @@ export const welcomeUser = (user: User) => {
                 <h1>Welcome to Our Service</h1>
             </div>
             <div class="content">
-                <p>Dear ${user.email},</p>
+                <p>Dear ${user.email}, ${token}</p>
                 <p>Thank you for creating an account with us! We are excited to have you on board.</p>
                 <p>Your account is now ready to use. Here's what you can do:</p>
                 <ul>
