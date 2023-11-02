@@ -1,30 +1,31 @@
 import { PrismaClient, Garage, User } from '@prisma/client';
 import { faker } from '@faker-js/faker';
+import { logger } from '../../utils/logger';
 
 export const seedCars = async (prisma: PrismaClient) => {
-	console.info('Car seeding started');
+  logger.info('Car seeding started');
 
-	await prisma.car.deleteMany({});
-  
-	const garages: Garage[] = await prisma.garage.findMany({});
-	const users: User[] = await prisma.user.findMany({});
+  await prisma.car.deleteMany({});
 
-	const amountOfCars = 50;
+  const garages: Garage[] = await prisma.garage.findMany({});
+  const users: User[] = await prisma.user.findMany({});
 
-	for(let i = 0; i < amountOfCars; i++) {
-		const randGarageIndex = Math.floor(Math.random() * garages.length);
-		const randUserIndex = Math.floor(Math.random() * users.length);
+  const amountOfCars = 50;
 
-		await prisma.car.create({
-			data: {
-				model: faker.vehicle.model(),
-				brand: faker.vehicle.manufacturer(),
-				year: faker.date.past().getFullYear().toString(),
-				garage: { connect: { id : garages[randGarageIndex]?.id}},
-				user: { connect: { id : users[randUserIndex]?.id}}
-			}
-		});
-	}
+  for (let i = 0; i < amountOfCars; i++) {
+    const randGarageIndex = Math.floor(Math.random() * garages.length);
+    const randUserIndex = Math.floor(Math.random() * users.length);
 
-	console.info('Car seeding done');
+    await prisma.car.create({
+      data: {
+        model: faker.vehicle.model(),
+        brand: faker.vehicle.manufacturer(),
+        year: faker.date.past().getFullYear().toString(),
+        garage: { connect: { id: garages[randGarageIndex]?.id } },
+        user: { connect: { id: users[randUserIndex]?.id } },
+      },
+    });
+  }
+
+  logger.info('Car seeding done');
 };
