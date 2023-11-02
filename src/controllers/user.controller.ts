@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import userService from '../services/user.services';
+import userService from '../services/user.service';
 import { Prisma, Role, User } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import { AuthenticatedRequest } from '../interfaces/auth.interface';

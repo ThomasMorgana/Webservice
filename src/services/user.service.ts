@@ -2,6 +2,7 @@ import { PrismaClient, Prisma, User } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import bcryptjs from 'bcryptjs';
 import { IncorrectPasswordError, MailAlreadyUsedError, MailNotFoundError } from '../errors/auth.error';
+import mailService from './mail.service';
 
 const prisma = new PrismaClient();
 
@@ -37,11 +38,15 @@ class UserService implements IUserService {
 
     if (user) throw new MailAlreadyUsedError();
 
-    return await prisma.user.create({
+    const newUser = await prisma.user.create({
       data: {
         ...credentials,
       },
     });
+
+    mailService.onRegister(newUser);
+
+    return newUser;
   }
 
   async retrieveAll(pagination?: Pagination): Promise<User[]> {

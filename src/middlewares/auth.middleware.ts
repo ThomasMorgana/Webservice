@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import userService from '../services/user.services';
+import userService from '../services/user.service';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { AuthenticatedRequest } from '../interfaces/auth.interface';
 

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import userService from '../services/user.services';
+import userService from '../services/user.service';
 import bcryptjs from 'bcryptjs';
 import { RefreshToken } from '@prisma/client';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt';
