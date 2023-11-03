@@ -2,17 +2,7 @@ import { PrismaClient, Car } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 
 const prisma = new PrismaClient();
-
-interface ICarRepository {
-  // eslint-disable-next-line no-unused-vars
-  save(car: Car): Promise<Car>;
-  retrieveAll(pagination?: Pagination): Promise<Car[]>;
-  retrieveById(carId: number): Promise<Car | null>;
-  update(car: Car): Promise<Car>;
-  delete(carId: number): Promise<number>;
-}
-
-class CarRepository implements ICarRepository {
+class CarRepository {
   async save(car: Car): Promise<Car> {
     return await prisma.car.create({
       data: {

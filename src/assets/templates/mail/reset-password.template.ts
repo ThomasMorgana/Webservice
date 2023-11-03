@@ -2,12 +2,12 @@ import { User } from '@prisma/client';
 
 export const resetPassword = (user: User, token: string) => {
   return {
-    subject: `Welcome !`,
+    subject: `Password Reset !`,
     content: `
     <!DOCTYPE html>
     <html>
     <head>
-        <title>Welcome to Our Service</title>
+        <title>Password Reset</title>
         <style>
             body {
                 font-family: Arial, sans-serif;
@@ -35,19 +35,11 @@ export const resetPassword = (user: User, token: string) => {
     <body>
         <div class="container">
             <div class="header">
-                <h1>Welcome to Our Service</h1>
+                <h1>Reset Requested</h1>
             </div>
             <div class="content">
-                <p>Dear ${user.email}, ${token}</p>
-                <p>Thank you for creating an account with us! We are excited to have you on board.</p>
-                <p>Your account is now ready to use. Here's what you can do:</p>
-                <ul>
-                    <li>Access all the great features of our service.</li>
-                    <li>Customize your profile and preferences.</li>
-                    <li>Start enjoying our amazing content.</li>
-                </ul>
-                <p>If you have any questions or need assistance, please don't hesitate to contact our support team. We're here to help.</p>
-                <p>Thank you again for choosing us. We look forward to serving you!</p>
+                <p>Dear ${user.email},</p>
+                <p>Use this token :  ${token}</p>
                 <p>Best regards,</p>
                 <p>The Webservice Team</p>
             </div>
