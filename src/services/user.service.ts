@@ -5,6 +5,7 @@ import { IncorrectPasswordError, MailAlreadyUsedError, MailNotFoundError } from 
 import mailService from './mail.service';
 
 const prisma = new PrismaClient();
+
 class UserService {
   async login(credentials: Prisma.UserCreateInput): Promise<User | null> {
     const user = await prisma.user.findUnique({
@@ -13,20 +14,28 @@ class UserService {
       },
     });
 
-    if (!user) throw new MailNotFoundError();
-    if (!bcryptjs.compareSync(credentials.password, user.password)) throw new IncorrectPasswordError();
+    if (!user) {
+      throw new MailNotFoundError();
+    }
+
+    const isPasswordValid = bcryptjs.compareSync(credentials.password, user.password);
+    if (!isPasswordValid) {
+      throw new IncorrectPasswordError();
+    }
 
     return user;
   }
 
   async register(credentials: Prisma.UserCreateInput): Promise<User> {
-    const user = await prisma.user.findUnique({
+    const existingUser = await prisma.user.findUnique({
       where: {
         email: credentials.email,
       },
     });
 
-    if (user) throw new MailAlreadyUsedError();
+    if (existingUser) {
+      throw new MailAlreadyUsedError();
+    }
 
     const newUser = await prisma.user.create({
       data: {
@@ -40,21 +49,24 @@ class UserService {
   }
 
   async retrieveAll(pagination?: Pagination): Promise<User[]> {
-    if (pagination?.page) {
-      const page = pagination.page ?? 0;
-      const step = pagination.step ?? 10;
-      return await prisma.user.findMany({ take: +step, skip: +step * +page, orderBy: { id: 'asc' } });
-    } else {
-      return await prisma.user.findMany();
-    }
+    const page = pagination?.page || 0;
+    const step = pagination?.step || 10;
+
+    const users = await prisma.user.findMany({
+      take: +step,
+      skip: +step * +page,
+      orderBy: { id: 'asc' },
+    });
+
+    return users;
   }
 
   async retrieveById(id: string): Promise<User | null> {
-    return await prisma.user.findUnique({ where: { id: id } });
+    return await prisma.user.findUnique({ where: { id } });
   }
 
   async retrieveByEmail(email: string): Promise<User | null> {
-    return await prisma.user.findUnique({ where: { email: email } });
+    return await prisma.user.findUnique({ where: { email } });
   }
 
   async update(user: User): Promise<User> {
@@ -65,7 +77,8 @@ class UserService {
   }
 
   async delete(id: string): Promise<string> {
-    return (await prisma.user.delete({ where: { id: id }, select: { id: true } })).id;
+    const deletedUser = await prisma.user.delete({ where: { id } });
+    return deletedUser.id;
   }
 }
 

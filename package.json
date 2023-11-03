@@ -5,7 +5,7 @@
     "main": "server.js",
     "scripts": {
         "build": "tsc",
-        "dev": "npx nodemon ./server.ts",
+        "dev": "npx nodemon ./src/app.ts",
         "start": "tsc && npm run dev",
         "seed": "npx prisma db seed",
         "lint": "eslint src/**/*.ts",
@@ -61,19 +61,5 @@
     "prisma": {
         "schema": "src/prisma/schema.prisma",
         "seed": "ts-node src/prisma/seeds"
-    },
-    "husky": {
-        "hooks": {
-            "pre-commit": "npm run format"
-        }
-    },
-    "validate-branch-name": {
-        "pattern": "^(main|develop){1}$|^(feature|bugfix|hotfix|chore|experiment)?$",
-        "errorMsg": "Branch name format : <type>/<name>/<issue_ID>"
-    },
-    "commitlint": {
-        "extends": [
-            "@commitlint/config-conventional"
-        ]
     }
 }
