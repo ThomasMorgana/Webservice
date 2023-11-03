@@ -1,7 +1,6 @@
-# Webservice 
+# Webservice
 
 Ce projet contient les corrections live-code des TP/TD cours de WebService d'Ynov
-
 
 ## Environment Variables
 
@@ -27,22 +26,26 @@ Instalation des dépendances avec npm
   npm install
 ```
 
-Lancement du seeding BDD avec 
+Lancement du seeding BDD avec
+
 ```bash
   npm run seed
 ```
 
 Lancement du serveur
+
 ```bash
   npm run start
 ```
 
 Build du projet
+
 ```bash
   npm run build
 ```
 
 Build et lancement du projet
+
 ```bash
   npm run dev
 ```
@@ -50,4 +53,3 @@ Build et lancement du projet
 ## Support
 
 Si vous avez des questions, thomas@codebuds.com.
-

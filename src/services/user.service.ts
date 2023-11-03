@@ -5,17 +5,7 @@ import { IncorrectPasswordError, MailAlreadyUsedError, MailNotFoundError } from 
 import mailService from './mail.service';
 
 const prisma = new PrismaClient();
-
-interface IUserService {
-  login(user: User): Promise<User | null>;
-  register(user: User): Promise<User>;
-  retrieveAll(pagination?: Pagination): Promise<User[]>;
-  retrieveById(userId: string): Promise<User | null>;
-  update(user: User): Promise<User>;
-  delete(userId: string): Promise<string>;
-}
-
-class UserService implements IUserService {
+class UserService {
   async login(credentials: Prisma.UserCreateInput): Promise<User | null> {
     const user = await prisma.user.findUnique({
       where: {
@@ -61,6 +51,10 @@ class UserService implements IUserService {
 
   async retrieveById(id: string): Promise<User | null> {
     return await prisma.user.findUnique({ where: { id: id } });
+  }
+
+  async retrieveByEmail(email: string): Promise<User | null> {
+    return await prisma.user.findUnique({ where: { email: email } });
   }
 
   async update(user: User): Promise<User> {

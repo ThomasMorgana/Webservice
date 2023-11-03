@@ -2,16 +2,7 @@ import { PrismaClient, Garage } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 
 const prisma = new PrismaClient();
-
-interface IGarageRepository {
-  save(garage: Garage): Promise<Garage>;
-  retrieveAll(pagination?: Pagination): Promise<Garage[]>;
-  retrieveById(garageId: number): Promise<Garage | null>;
-  update(garage: Garage): Promise<Garage>;
-  delete(garageId: number): Promise<number>;
-}
-
-class GarageRepository implements IGarageRepository {
+class GarageRepository {
   async save(garage: Garage): Promise<Garage> {
     return await prisma.garage.create({
       data: {

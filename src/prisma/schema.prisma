@@ -48,8 +48,21 @@ model User {
   updatedAt     DateTime       @updatedAt
   Garage        Garage[]
   Car           Car[]
+  ResetToken    ResetToken[]
 
   @@map("users")
+}
+
+model ResetToken {
+  id          String   @id @unique @default(uuid())
+  hashedToken String   @unique
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  revoked     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("reset_token")
 }
 
 model RefreshToken {

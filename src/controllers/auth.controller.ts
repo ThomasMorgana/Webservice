@@ -5,6 +5,8 @@ import { RefreshToken } from '@prisma/client';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt';
 import jwt from 'jsonwebtoken';
 import { IncorrectPasswordError, MailAlreadyUsedError, MailNotFoundError } from '../errors/auth.error';
+import resetTokenService from '../services/reset-token.service';
+import mailService from '../services/mail.service';
 
 export default class AuthController {
   async login(req: Request, res: Response, next: NextFunction) {
@@ -74,5 +76,33 @@ export default class AuthController {
       accessToken: generateAccessToken(user),
       refreshToken: generateRefreshToken(user),
     });
+  }
+
+  async generateResetToken(req: Request, res: Response) {
+    const userEmail = req.body.email;
+
+    if (!userEmail) return res.status(401).send('Please send the user email in the body');
+
+    const user = await userService.retrieveByEmail(userEmail);
+
+    if (user) {
+      const resetToken = await resetTokenService.generate(user.id);
+      mailService.onPasswordReset(user, resetToken.hashedToken);
+    }
+
+    res.status(200).send('If the email matches one of our accounts, an email has been sent with the reset token');
+  }
+
+  async resetPassword(req: Request, res: Response) {
+    const { token, password } = req.body;
+
+    if (!token || !password) return res.status(401).send('Please send the token and the password');
+    try {
+      const user = await resetTokenService.getUserFromToken(token);
+      const updatedUser = await userService.update({ ...user, password: await bcryptjs.hash(password, 12) });
+      res.status(200).send(updatedUser);
+    } catch (error) {
+      res.status(404).send('The token is either unknown, invalid or already used');
+    }
   }
 }

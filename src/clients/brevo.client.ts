@@ -1,6 +1,8 @@
 import { User } from '@prisma/client';
 
 class BrevoClient {
+  TRANSACTIONAL_URL = 'https://api.brevo.com/v3/smtp/email';
+
   async sendMail(receiver: User, subject: string, content: string) {
     const data = {
       sender: {
@@ -17,7 +19,7 @@ class BrevoClient {
       htmlcontent: content,
     };
 
-    await fetch('https://api.brevo.com/v3/smtp/email', {
+    await fetch(this.TRANSACTIONAL_URL, {
       method: 'POST',
       mode: 'cors',
       cache: 'no-cache',
