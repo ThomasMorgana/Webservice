@@ -6,15 +6,15 @@ import { AuthenticatedRequest } from '../interfaces/auth.interface';
 
 export default class UserController {
   async create(req: Request, res: Response) {
-    if (!req.body) {
-      res.status(400).send({
-        message: 'Content can not be empty!',
-      });
-
-      return;
-    }
     try {
+      if (!req.body) {
+        return res.status(400).send({
+          message: 'Content cannot be empty!',
+        });
+      }
+
       const savedUser = await userService.register(req.body);
+
       res.status(201).send(savedUser);
     } catch (error) {
       res.status(500).send({
@@ -24,25 +24,25 @@ export default class UserController {
   }
 
   async createAdmin(req: Request, res: Response) {
-    if (!req.body) {
-      res.status(400).send({
-        message: 'Content can not be empty!',
-      });
-      return;
-    }
     try {
+      if (!req.body) {
+        return res.status(400).send({
+          message: 'Content cannot be empty!',
+        });
+      }
+
       const user: User = req.body;
       const currentUserRole: Role = (req as AuthenticatedRequest).role;
 
-      if (currentUserRole != Role.ADMIN) {
-        res.status(403).send({
+      if (currentUserRole !== Role.ADMIN) {
+        return res.status(403).send({
           message: 'You must be an Admin to create an Admin',
         });
-        return;
       }
 
       user.role = Role.ADMIN;
       const savedUser = await userService.register(user);
+
       res.status(201).send(savedUser);
     } catch (error) {
       res.status(500).send({
@@ -64,9 +64,14 @@ export default class UserController {
 
   async findOne(req: Request, res: Response) {
     const id: string = req.params.id;
+
     try {
       const user = await userService.retrieveById(id);
-      res.status(user ? 200 : 400).send(user ? user : `User with id=${id} not found`);
+      if (user) {
+        res.status(200).send(user);
+      } else {
+        res.status(404).send(`User with id=${id} not found`);
+      }
     } catch (error) {
       res.status(500).send({
         message: 'Internal Server Error!',
@@ -77,6 +82,7 @@ export default class UserController {
   async update(req: Request, res: Response) {
     const userToUpdate: User = req.body;
     userToUpdate.id = req.params.id;
+
     try {
       const user = await userService.update(userToUpdate);
       res.status(200).send(user);
@@ -95,6 +101,7 @@ export default class UserController {
 
   async delete(req: Request, res: Response) {
     const id: string = req.params.id;
+
     try {
       await userService.delete(id);
       res.status(200).send({

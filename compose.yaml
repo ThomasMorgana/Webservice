@@ -1,6 +1,9 @@
+version: '3.8'
+
 services:
   webservice:
     build:
+      context: .
       dockerfile: Dockerfile
       target: dev
     image: node:18-alpine
@@ -11,10 +14,10 @@ services:
     volumes:
       - ./:/app
     environment:
-      MYSQL_HOST: "${MYSQL_HOST}"
-      MYSQL_USER: "${MYSQL_USER}"
-      MYSQL_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
-      MYSQL_DB: "${MYSQL_DATABASE}"
+      MYSQL_HOST: '${MYSQL_HOST}'
+      MYSQL_USER: '${MYSQL_USER}'
+      MYSQL_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
+      MYSQL_DB: '${MYSQL_DATABASE}'
     depends_on:
       mysql:
         condition: service_healthy
@@ -24,12 +27,12 @@ services:
     volumes:
       - webservice-mysql-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
       timeout: 10s
       retries: 12
     environment:
-      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
-      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      MYSQL_ROOT_PASSWORD: '${MYSQL_ROOT_PASSWORD}'
+      MYSQL_DATABASE: '${MYSQL_DATABASE}'
 
 volumes:
   webservice-mysql-data:

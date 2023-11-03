@@ -2,9 +2,12 @@ import { PrismaClient, Car } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 
 const prisma = new PrismaClient();
-class CarRepository {
+
+export class CarRepository {
+  constructor(private prisma: PrismaClient) {}
+
   async save(car: Car): Promise<Car> {
-    return await prisma.car.create({
+    return this.prisma.car.create({
       data: {
         model: car.model,
         brand: car.brand,
@@ -15,29 +18,30 @@ class CarRepository {
   }
 
   async retrieveAll(pagination?: Pagination): Promise<Car[]> {
-    if (pagination?.page) {
-      const page = pagination.page ?? 0;
-      const step = pagination.step ?? 10;
-      return await prisma.car.findMany({ take: +step, skip: +step * +page, orderBy: { id: 'asc' } });
-    } else {
-      return await prisma.car.findMany();
-    }
+    const { page = 0, step = 10 } = pagination || {};
+    const cars = await this.prisma.car.findMany({
+      take: +step,
+      skip: +step * +page,
+      orderBy: { id: 'asc' },
+    });
+    return cars;
   }
 
   async retrieveById(id: number): Promise<Car | null> {
-    return await prisma.car.findUnique({ where: { id: id } });
+    return this.prisma.car.findUnique({ where: { id } });
   }
 
   async update(car: Car): Promise<Car> {
-    return await prisma.car.update({
+    return this.prisma.car.update({
       where: { id: car.id },
       data: { ...car },
     });
   }
 
   async delete(id: number): Promise<number> {
-    return (await prisma.car.delete({ where: { id: id }, select: { id: true } })).id;
+    const result = await this.prisma.car.delete({ where: { id }, select: { id: true } });
+    return result.id;
   }
 }
 
-export default new CarRepository();
+export default new CarRepository(prisma);
