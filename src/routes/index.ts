@@ -3,6 +3,7 @@ import AuthRoutes from './auth.routes';
 import CarRoutes from './car.routes';
 import GarageRoutes from './garage.routes';
 import UserRoutes from './user.routes';
+import MonitoringRoutes from './monitoring.routes';
 
 export default class Routes {
   constructor(app: Application) {
@@ -18,5 +19,7 @@ export default class Routes {
     apiRouter.use('/users', UserRoutes);
 
     app.use('/api', apiRouter);
+
+    app.use('/', MonitoringRoutes);
   }
 }

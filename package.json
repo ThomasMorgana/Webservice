@@ -64,7 +64,8 @@
         "express-pino-logger": "^7.0.0",
         "express-rate-limit": "^7.1.1",
         "jsonwebtoken": "^9.0.1",
-        "pino": "^8.16.1"
+        "pino": "^8.16.1",
+        "prom-client": "^15.0.0"
     },
     "prisma": {
         "schema": "src/prisma/schema.prisma",
