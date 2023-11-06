@@ -11,7 +11,7 @@ class MonitoringRoutes {
   private initializeRoutes() {
     const register = new promClient.Registry();
     register.setDefaultLabels({
-      app: 'monitoring-article',
+      app: 'webservice',
     });
     promClient.collectDefaultMetrics({ register });
 

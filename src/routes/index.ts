@@ -17,8 +17,9 @@ export default class Routes {
     apiRouter.use('/cars', CarRoutes);
     apiRouter.use('/garages', GarageRoutes);
     apiRouter.use('/users', UserRoutes);
-    apiRouter.use(MonitoringRoutes);
 
     app.use('/api', apiRouter);
+
+    app.use('/', MonitoringRoutes);
   }
 }
