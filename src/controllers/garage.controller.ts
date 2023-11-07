@@ -36,7 +36,6 @@ export default class GarageController {
     }
   }
 
-  // Find a garage by ID
   async findOne(req: Request, res: Response) {
     const id: number = parseInt(req.params.id);
 
@@ -74,7 +73,6 @@ export default class GarageController {
     }
   }
 
-  // Delete a garage
   async delete(req: Request, res: Response) {
     const id: number = parseInt(req.params.id);
 

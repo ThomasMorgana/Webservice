@@ -5,12 +5,13 @@ import Routes from '../routes';
 
 export default class Server {
   constructor(app: Application) {
-    this.configureApp(app);
+    this.configureExpress(app);
     this.setupMiddleware(app);
     this.initializeRoutes(app);
   }
 
-  private configureApp(app: Application): void {
+  private configureExpress(app: Application): void {
+    app.use('/api/subscription/stripe-hook', express.raw({ type: '*/*' }));
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
   }
