@@ -1,4 +1,5 @@
 import { User } from '@prisma/client';
+import { logger } from '../utils/logger';
 
 class BrevoClient {
   private TRANSACTIONAL_URL = 'https://api.brevo.com/v3/smtp/email';
@@ -42,9 +43,11 @@ class BrevoClient {
         throw new Error(`Failed to send email: ${response.statusText}`);
       }
     } catch (error) {
-      console.error(`Email sending error: ${error}`);
+      logger.error(`Email sending error: ${error}`);
     }
   }
 }
 
-export default new BrevoClient(process.env.BREVO_API_KEY as string);
+const brevoClient = new BrevoClient(process.env.BREVO_API_KEY as string);
+
+export default brevoClient;
