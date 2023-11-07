@@ -2,7 +2,7 @@ import { PrismaClient, Garage } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 
 const prisma = new PrismaClient();
-export class GarageRepository {
+export class GarageService {
   constructor(private prisma: PrismaClient) {}
 
   async save(garage: Garage): Promise<Garage> {
@@ -41,4 +41,4 @@ export class GarageRepository {
   }
 }
 
-export default new GarageRepository(prisma);
+export default new GarageService(prisma);
