@@ -3,7 +3,7 @@ import Pagination from '../interfaces/pagination.interface';
 
 const prisma = new PrismaClient();
 
-export class CarRepository {
+export class CarService {
   constructor(private prisma: PrismaClient) {}
 
   async save(car: Car): Promise<Car> {
@@ -44,4 +44,4 @@ export class CarRepository {
   }
 }
 
-export default new CarRepository(prisma);
+export default new CarService(prisma);

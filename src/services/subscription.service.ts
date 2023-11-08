@@ -6,7 +6,7 @@ import { logger } from '../utils/logger';
 
 const prisma = new PrismaClient();
 
-export class SubscriptionRepository {
+export class SubscriptionService {
   constructor(private prisma: PrismaClient) {}
 
   async save(userId: string): Promise<Subscription> {
@@ -95,4 +95,4 @@ export class SubscriptionRepository {
   }
 }
 
-export default new SubscriptionRepository(prisma);
+export default new SubscriptionService(prisma);

@@ -3,8 +3,8 @@ import mailClient from '../clients/brevo.client';
 import { welcomeUser, resetPassword } from '../assets/templates/mail';
 
 class MailService {
-  async onRegister(user: User) {
-    const { subject, content } = welcomeUser(user);
+  async onRegister(user: User, activationCode: string) {
+    const { subject, content } = welcomeUser(user, activationCode);
     mailClient.sendMail(user, subject, content);
   }
 
