@@ -3,6 +3,8 @@ import userService from '../services/user.service';
 import { Prisma, Role, User } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import { AuthenticatedRequest } from '../interfaces/auth.interface';
+import { logger } from '../utils/logger';
+import { ActivationTokenInvalidError, UserNotFoundError } from '../errors/auth.error';
 
 export default class UserController {
   async create(req: Request, res: Response) {
@@ -48,6 +50,26 @@ export default class UserController {
       res.status(500).send({
         message: 'Internal Server Error!',
       });
+    }
+  }
+
+  async activateAccount(req: Request, res: Response) {
+    const token = req.query.token as string;
+
+    if (!token) return res.status(400).send('PLease provide the activation token as parameter');
+
+    try {
+      await userService.activateAccount(token);
+      res.status(200).send('activated');
+    } catch (error) {
+      logger.error(error);
+      if (error instanceof ActivationTokenInvalidError) {
+        res.status(401).send(error);
+      } else if (error instanceof UserNotFoundError) {
+        res.status(404).send(error);
+      } else {
+        res.status(500).send(error);
+      }
     }
   }
 

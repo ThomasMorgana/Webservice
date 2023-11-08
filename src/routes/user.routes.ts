@@ -11,6 +11,8 @@ class UserRoutes {
   }
 
   private initializeRoutes() {
+    this.router.get('/activate', this.controller.activateAccount);
+
     this.router.post('/', authenticateToken, this.controller.createAdmin);
     this.router.get('/', this.controller.findAll);
     this.router.get('/:id', this.controller.findOne);

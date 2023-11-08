@@ -1,8 +1,16 @@
 import { PrismaClient, Prisma, User } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import bcryptjs from 'bcryptjs';
-import { IncorrectPasswordError, MailAlreadyUsedError, MailNotFoundError } from '../errors/auth.error';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+import {
+  ActivationTokenInvalidError,
+  IncorrectPasswordError,
+  MailAlreadyUsedError,
+  MailNotFoundError,
+  UserNotFoundError,
+} from '../errors/auth.error';
 import mailService from './mail.service';
+import { generateActivationToken } from '../utils/jwt';
 
 const prisma = new PrismaClient();
 
@@ -43,9 +51,27 @@ class UserService {
       },
     });
 
-    mailService.onRegister(newUser);
+    const activationToken = await generateActivationToken(newUser);
+
+    mailService.onRegister(newUser, activationToken);
 
     return newUser;
+  }
+
+  async activateAccount(token: string) {
+    const decoded = jwt.verify(token, process.env.JWT_ACTIVATION_SECRET as string) as JwtPayload;
+    if (!decoded.id) throw new ActivationTokenInvalidError();
+
+    const user = await this.retrieveById(decoded.id);
+    if (!user) throw new UserNotFoundError();
+
+    user.active = true;
+
+    try {
+      return await this.update(user);
+    } catch (error) {
+      throw new Error("Erreur lors de l'activation du compte");
+    }
   }
 
   async retrieveAll(pagination?: Pagination): Promise<User[]> {

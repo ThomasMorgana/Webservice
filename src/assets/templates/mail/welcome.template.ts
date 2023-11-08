@@ -1,6 +1,6 @@
 import { User } from '@prisma/client';
 
-export const welcomeUser = (user: User) => {
+export const welcomeUser = (user: User, activationCode: string) => {
   return {
     subject: `Welcome !`,
     content: `
@@ -46,6 +46,7 @@ export const welcomeUser = (user: User) => {
                     <li>Customize your profile and preferences.</li>
                     <li>Start enjoying our amazing content.</li>
                 </ul>
+                <p>Here is your activation code : ${activationCode},</p>
                 <p>If you have any questions or need assistance, please don't hesitate to contact our support team. We're here to help.</p>
                 <p>Thank you again for choosing us. We look forward to serving you!</p>
                 <p>Best regards,</p>

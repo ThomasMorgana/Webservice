@@ -11,6 +11,10 @@ export const generateAccessToken = (user: User) => {
   return generateToken(user, process.env.JWT_ACCESS_SECRET as string, '5m');
 };
 
+export const generateActivationToken = (user: User) => {
+  return generateToken(user, process.env.JWT_ACTIVATION_SECRET as string, '1h');
+};
+
 export const generateRefreshToken = (user: User) => {
   return generateToken(user, process.env.JWT_REFRESH_SECRET as string, '1y');
 };

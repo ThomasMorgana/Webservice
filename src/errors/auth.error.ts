@@ -27,3 +27,9 @@ export class ResetTokenInvalidError extends Error {
     super('This token is either invalid or already used');
   }
 }
+
+export class ActivationTokenInvalidError extends Error {
+  constructor() {
+    super("Le token d'activation est invalide");
+  }
+}

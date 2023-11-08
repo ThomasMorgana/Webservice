@@ -19,6 +19,10 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
       return res.status(404).send('The user associated with this token does not exist anymore');
     }
 
+    if (!user.active) {
+      return res.status(401).send('Account is not verified. Check your emails for the verification link.');
+    }
+
     (req as AuthenticatedRequest).role = user.role;
     (req as AuthenticatedRequest).token = decoded;
 
