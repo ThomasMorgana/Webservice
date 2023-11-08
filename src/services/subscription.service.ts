@@ -6,7 +6,7 @@ import { logger } from '../utils/logger';
 
 const prisma = new PrismaClient();
 
-export class SubscriptionService {
+export class SubscriptionRepository {
   constructor(private prisma: PrismaClient) {}
 
   async save(userId: string): Promise<Subscription> {
@@ -42,6 +42,7 @@ export class SubscriptionService {
     switch (eventType) {
       case 'payment_intent.succeeded':
         const pi: Stripe.PaymentIntent = data.object as Stripe.PaymentIntent;
+
         const { subscriptionId } = pi.metadata;
         if (!subscriptionId) throw new Error('No Subscription Id Defined');
 
@@ -49,10 +50,11 @@ export class SubscriptionService {
         if (!subscription) throw new Error('No Subscription found');
 
         subscription.active = true;
-        const updatedSubscription = this.prisma.subscription.update({
+        const updatedSubscription = await this.prisma.subscription.update({
           where: { id: subscriptionId },
           data: subscription,
         });
+
         if (!updatedSubscription) throw new Error('Error while updating subscription');
 
         logger.info(`The subscription ${subscription.id} for user with ${subscription.userId} has been activated`);
@@ -64,7 +66,6 @@ export class SubscriptionService {
 
       default:
         logger.error('Unsupported Callback Status on stripe webhook');
-        throw new Error('Unsupported Callback Status');
     }
   }
 
@@ -95,4 +96,4 @@ export class SubscriptionService {
   }
 }
 
-export default new SubscriptionService(prisma);
+export default new SubscriptionRepository(prisma);

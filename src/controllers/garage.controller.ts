@@ -3,25 +3,24 @@ import garageService from '../services/garage.service';
 import { Garage, Prisma } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import { AuthenticatedRequest } from '../interfaces/auth.interface';
+import { errorHandler } from '../utils/error_handler';
 
 export default class GarageController {
   async create(req: Request, res: Response) {
-    try {
-      if (!req.body) {
-        return res.status(400).send({
-          message: 'Content can not be empty!',
-        });
-      }
+    if (!req.body) {
+      return res.status(400).send({
+        message: 'Content can not be empty!',
+      });
+    }
 
+    try {
       const garage: Garage = req.body;
       garage.userId = (req as AuthenticatedRequest).token.id;
       const savedGarage = await garageService.save(garage);
 
       res.status(201).send(savedGarage);
     } catch (error) {
-      res.status(500).send({
-        message: 'Internal Server Error! Something went wrong while creating the garage',
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -30,9 +29,7 @@ export default class GarageController {
       const garages = await garageService.retrieveAll(req.query as Pagination);
       res.status(200).send(garages);
     } catch (error) {
-      res.status(500).send({
-        message: 'Internal Server Error! Something went wrong getting the garages',
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -47,9 +44,7 @@ export default class GarageController {
         res.status(404).send(`Garage with id=${id} not found`);
       }
     } catch (error) {
-      res.status(500).send({
-        message: 'Internal Server Error!',
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -66,9 +61,7 @@ export default class GarageController {
           message: `Garage with id=${garageToUpdate.id} not found`,
         });
       } else {
-        res.status(500).send({
-          message: 'Internal Server Error!',
-        });
+        errorHandler(res, error);
       }
     }
   }
@@ -87,9 +80,7 @@ export default class GarageController {
           message: `Garage with id=${id} not found`,
         });
       } else {
-        res.status(500).send({
-          message: 'Internal Server Error!',
-        });
+        errorHandler(res, error);
       }
     }
   }

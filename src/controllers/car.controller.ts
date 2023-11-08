@@ -3,25 +3,24 @@ import carService from '../services/car.service';
 import { Car, Prisma } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import { AuthenticatedRequest } from '../interfaces/auth.interface';
+import { errorHandler } from '../utils/error_handler';
 
 export default class CarController {
   async create(req: Request, res: Response) {
+    if (!req.body) {
+      return res.status(400).send({
+        message: 'Content can not be empty!',
+      });
+    }
+
+    const car: Car = req.body;
+    car.userId = (req as AuthenticatedRequest).token.id;
+
     try {
-      if (!req.body) {
-        return res.status(400).send({
-          message: 'Content can not be empty!',
-        });
-      }
-
-      const car: Car = req.body;
-      car.userId = (req as AuthenticatedRequest).token.id;
       const savedCar = await carService.save(car);
-
       res.status(201).send(savedCar);
     } catch (error) {
-      res.status(500).send({
-        message: 'Internal Server Error! Something went wrong while creating the car',
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -30,9 +29,7 @@ export default class CarController {
       const cars = await carService.retrieveAll(req.query as Pagination);
       res.status(200).send(cars);
     } catch (error) {
-      res.status(500).send({
-        message: 'Internal Server Error! Something went wrong getting the cars',
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -47,9 +44,7 @@ export default class CarController {
         res.status(404).send(`Car with id=${id} not found`);
       }
     } catch (error) {
-      res.status(500).send({
-        message: 'Internal Server Error!',
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -66,9 +61,7 @@ export default class CarController {
           message: `Car with id=${carToUpdate.id} not found`,
         });
       } else {
-        res.status(500).send({
-          message: 'Internal Server Error!',
-        });
+        errorHandler(res, error);
       }
     }
   }
@@ -87,9 +80,7 @@ export default class CarController {
           message: `Car with id=${id} not found`,
         });
       } else {
-        res.status(500).send({
-          message: 'Internal Server Error!',
-        });
+        errorHandler(res, error);
       }
     }
   }

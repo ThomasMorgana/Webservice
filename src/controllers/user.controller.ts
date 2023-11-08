@@ -3,8 +3,7 @@ import userService from '../services/user.service';
 import { Prisma, Role, User } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import { AuthenticatedRequest } from '../interfaces/auth.interface';
-import { logger } from '../utils/logger';
-import { ActivationTokenInvalidError, UserNotFoundError } from '../errors/auth.error';
+import { errorHandler } from '../utils/error_handler';
 
 export default class UserController {
   async create(req: Request, res: Response) {
@@ -62,14 +61,7 @@ export default class UserController {
       await userService.activateAccount(token);
       res.status(200).send('activated');
     } catch (error) {
-      logger.error(error);
-      if (error instanceof ActivationTokenInvalidError) {
-        res.status(401).send(error);
-      } else if (error instanceof UserNotFoundError) {
-        res.status(404).send(error);
-      } else {
-        res.status(500).send(error);
-      }
+      errorHandler(res, error);
     }
   }
 
@@ -78,9 +70,7 @@ export default class UserController {
       const users = await userService.retrieveAll(req.query as Pagination);
       res.status(200).send(users);
     } catch (error) {
-      res.status(500).send({
-        message: 'Internal Server Error!',
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -95,9 +85,7 @@ export default class UserController {
         res.status(404).send(`User with id=${id} not found`);
       }
     } catch (error) {
-      res.status(500).send({
-        message: 'Internal Server Error!',
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -114,9 +102,7 @@ export default class UserController {
           message: `User with id=${userToUpdate.id} not found`,
         });
       } else {
-        res.status(500).send({
-          message: 'Internal Server Error!',
-        });
+        errorHandler(res, error);
       }
     }
   }
@@ -135,9 +121,7 @@ export default class UserController {
           message: `User with id=${id} not found`,
         });
       } else {
-        res.status(500).send({
-          message: 'Internal Server Error!',
-        });
+        errorHandler(res, error);
       }
     }
   }

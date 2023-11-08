@@ -2,25 +2,30 @@ import { Request, Response } from 'express';
 import subscriptionService from '../services/subscription.service';
 import { Subscription, Prisma } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
+import { errorHandler } from '../utils/error_handler';
 
 export default class SubscriptionController {
   async create(req: Request, res: Response) {
+    if (!req.body) {
+      return res.status(400).send({
+        message: 'Content can not be empty!',
+      });
+    }
+
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).send({
+        message: 'You must send the userId!',
+      });
+    }
+
     try {
-      if (!req.body) {
-        return res.status(400).send({
-          message: 'You need to pass the userId',
-        });
-      }
-
-      const { userId } = req.body;
-
       const savedSubscription = await subscriptionService.save(userId);
 
       res.status(201).send(savedSubscription);
     } catch (error) {
-      res.status(500).send({
-        message: 'Internal Server Error! Something went wrong while creating the subscription',
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -29,9 +34,7 @@ export default class SubscriptionController {
       const subscriptions = await subscriptionService.retrieveAll(req.query as Pagination);
       res.status(200).send(subscriptions);
     } catch (error) {
-      res.status(500).send({
-        message: 'Internal Server Error! Something went wrong getting the subscriptions',
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -46,9 +49,7 @@ export default class SubscriptionController {
         res.status(404).send(`Subscription with id=${id} not found`);
       }
     } catch (error) {
-      res.status(500).send({
-        message: 'Internal Server Error!',
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -69,14 +70,13 @@ export default class SubscriptionController {
       const subscription = await subscriptionService.update(subscriptionToUpdate);
       res.status(200).send(subscription);
     } catch (error) {
+      //TODO: move these to the service
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
         res.status(404).send({
           message: `Subscription with id=${subscriptionToUpdate.id} not found`,
         });
       } else {
-        res.status(500).send({
-          message: 'Internal Server Error!',
-        });
+        errorHandler(res, error);
       }
     }
   }
@@ -95,9 +95,7 @@ export default class SubscriptionController {
           message: `Subscription with id=${id} not found`,
         });
       } else {
-        res.status(500).send({
-          message: 'Internal Server Error!',
-        });
+        errorHandler(res, error);
       }
     }
   }

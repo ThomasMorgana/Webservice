@@ -4,9 +4,9 @@ import bcryptjs from 'bcryptjs';
 import { RefreshToken } from '@prisma/client';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt';
 import jwt from 'jsonwebtoken';
-import { IncorrectPasswordError, MailAlreadyUsedError, MailNotFoundError } from '../errors/auth.error';
 import resetTokenService from '../services/reset-token.service';
 import mailService from '../services/mail.service';
+import { errorHandler } from '../utils/error_handler';
 
 export default class AuthController {
   async login(req: Request, res: Response) {
@@ -26,11 +26,7 @@ export default class AuthController {
 
       res.status(200).send({ user, token: accessToken, refreshToken });
     } catch (error) {
-      if (error instanceof MailNotFoundError || error instanceof IncorrectPasswordError) {
-        res.status(404).send({ message: "Those credentials don't match any users" });
-      } else {
-        res.status(500).send({ message: 'Internal Server Error! Something went wrong while logging in' });
-      }
+      errorHandler(res, error);
     }
   }
 
@@ -48,15 +44,7 @@ export default class AuthController {
 
       res.status(200).send({ user, token: accessToken, refreshToken });
     } catch (error) {
-      if (error instanceof MailAlreadyUsedError) {
-        res.status(409).send({
-          message: 'An account with this email already exists, try logging in!',
-        });
-      } else {
-        res.status(500).send({
-          message: 'Internal Server Error! Something went wrong while registering',
-        });
-      }
+      errorHandler(res, error);
     }
   }
 
@@ -80,7 +68,7 @@ export default class AuthController {
         refreshToken: generateRefreshToken(user),
       });
     } catch (error) {
-      res.status(500).send('Internal Server Error! Something went wrong while generating a refresh token');
+      errorHandler(res, error);
     }
   }
 
@@ -113,7 +101,7 @@ export default class AuthController {
       const updatedUser = await userService.update({ ...user, password: await bcryptjs.hash(password, 12) });
       res.status(200).send(updatedUser);
     } catch (error) {
-      res.status(404).send('The token is either unknown, invalid, or already used');
+      errorHandler(res, error);
     }
   }
 }
