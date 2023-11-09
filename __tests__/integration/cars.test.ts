@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import CarController from '../../src/controllers/car.controller';
+import { StatusCodes } from 'http-status-codes';
 
 describe('CarController', () => {
   const controller = new CarController();
@@ -19,7 +20,7 @@ describe('CarController', () => {
 
       await controller.findAll(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.OK);
       expect(res.send).toHaveBeenCalled();
     });
   });

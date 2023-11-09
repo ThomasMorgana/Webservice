@@ -1,6 +1,7 @@
 import { PrismaClient, ResetToken, User } from '@prisma/client';
 import { randomBytes } from 'crypto';
-import { ResetTokenInvalidError, UserNotFoundError } from '../errors/auth.error';
+import { ResetTokenInvalidError } from '../errors/auth.error';
+import { EntityNotFoundError } from '../errors/base.error';
 
 const prisma = new PrismaClient();
 
@@ -35,7 +36,7 @@ class ResetTokenService {
     });
 
     if (!user) {
-      throw new UserNotFoundError();
+      throw new EntityNotFoundError('User', resetToken.userId);
     }
 
     return user;

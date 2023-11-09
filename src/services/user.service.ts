@@ -11,6 +11,7 @@ import {
 } from '../errors/auth.error';
 import mailService from './mail.service';
 import { generateActivationToken } from '../utils/jwt';
+import { EntityNotFoundError, InternalServerError } from '../errors/base.error';
 
 const prisma = new PrismaClient();
 
@@ -35,27 +36,32 @@ class UserService {
   }
 
   async register(credentials: Prisma.UserCreateInput): Promise<User> {
-    const existingUser = await prisma.user.findUnique({
-      where: {
-        email: credentials.email,
-      },
-    });
+    try {
+      const existingUser = await prisma.user.findUnique({
+        where: {
+          email: credentials.email,
+        },
+      });
 
-    if (existingUser) {
-      throw new MailAlreadyUsedError();
+      if (existingUser) {
+        throw new MailAlreadyUsedError();
+      }
+
+      const newUser = await prisma.user.create({
+        data: {
+          ...credentials,
+        },
+      });
+
+      const activationToken = await generateActivationToken(newUser);
+
+      await mailService.onRegister(newUser, activationToken);
+
+      return newUser;
+    } catch (error) {
+      if (error instanceof MailAlreadyUsedError) throw error;
+      throw new InternalServerError(error);
     }
-
-    const newUser = await prisma.user.create({
-      data: {
-        ...credentials,
-      },
-    });
-
-    const activationToken = await generateActivationToken(newUser);
-
-    mailService.onRegister(newUser, activationToken);
-
-    return newUser;
   }
 
   async activateAccount(token: string) {
@@ -70,7 +76,7 @@ class UserService {
     try {
       return await this.update(user);
     } catch (error) {
-      throw new Error("Erreur lors de l'activation du compte");
+      throw new InternalServerError(error);
     }
   }
 
@@ -92,19 +98,43 @@ class UserService {
   }
 
   async retrieveByEmail(email: string): Promise<User | null> {
-    return await prisma.user.findUnique({ where: { email } });
+    try {
+      return await prisma.user.findUnique({ where: { email } });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        throw new EntityNotFoundError('User', email);
+      } else {
+        throw new InternalServerError(error);
+      }
+    }
   }
 
   async update(user: User): Promise<User> {
-    return await prisma.user.update({
-      where: { id: user.id },
-      data: { ...user },
-    });
+    try {
+      return await prisma.user.update({
+        where: { id: user.id },
+        data: { ...user },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        throw new EntityNotFoundError('User', user.id);
+      } else {
+        throw new InternalServerError(error);
+      }
+    }
   }
 
   async delete(id: string): Promise<string> {
-    const deletedUser = await prisma.user.delete({ where: { id } });
-    return deletedUser.id;
+    try {
+      const deletedUser = await prisma.user.delete({ where: { id } });
+      return deletedUser.id;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        throw new EntityNotFoundError('User', id);
+      } else {
+        throw new InternalServerError(error);
+      }
+    }
   }
 }
 

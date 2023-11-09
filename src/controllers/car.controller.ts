@@ -1,14 +1,15 @@
 import { Request, Response } from 'express';
 import carService from '../services/car.service';
-import { Car, Prisma } from '@prisma/client';
+import { Car } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import { AuthenticatedRequest } from '../interfaces/auth.interface';
 import { errorHandler } from '../utils/error_handler';
+import { StatusCodes } from 'http-status-codes';
 
 export default class CarController {
   async create(req: Request, res: Response) {
     if (!req.body) {
-      return res.status(400).send({
+      return res.status(StatusCodes.BAD_REQUEST).send({
         message: 'Content can not be empty!',
       });
     }
@@ -18,7 +19,7 @@ export default class CarController {
 
     try {
       const savedCar = await carService.save(car);
-      res.status(201).send(savedCar);
+      res.status(StatusCodes.CREATED).send(savedCar);
     } catch (error) {
       errorHandler(res, error);
     }
@@ -27,7 +28,7 @@ export default class CarController {
   async findAll(req: Request, res: Response) {
     try {
       const cars = await carService.retrieveAll(req.query as Pagination);
-      res.status(200).send(cars);
+      res.status(StatusCodes.OK).send(cars);
     } catch (error) {
       errorHandler(res, error);
     }
@@ -39,9 +40,9 @@ export default class CarController {
     try {
       const car = await carService.retrieveById(id);
       if (car) {
-        res.status(200).send(car);
+        res.status(StatusCodes.OK).send(car);
       } else {
-        res.status(404).send(`Car with id=${id} not found`);
+        res.status(StatusCodes.NOT_FOUND).send(`Car with id=${id} not found`);
       }
     } catch (error) {
       errorHandler(res, error);
@@ -54,15 +55,9 @@ export default class CarController {
 
     try {
       const car = await carService.update(carToUpdate);
-      res.status(200).send(car);
+      res.status(StatusCodes.OK).send(car);
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        res.status(404).send({
-          message: `Car with id=${carToUpdate.id} not found`,
-        });
-      } else {
-        errorHandler(res, error);
-      }
+      errorHandler(res, error);
     }
   }
 
@@ -71,17 +66,11 @@ export default class CarController {
 
     try {
       await carService.delete(id);
-      res.status(200).send({
+      res.status(StatusCodes.OK).send({
         message: `Car with id=${id} deleted`,
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        res.status(404).send({
-          message: `Car with id=${id} not found`,
-        });
-      } else {
-        errorHandler(res, error);
-      }
+      errorHandler(res, error);
     }
   }
 }

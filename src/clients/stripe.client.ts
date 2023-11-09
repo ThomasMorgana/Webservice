@@ -1,5 +1,6 @@
 import Stripe from 'stripe';
-import { logger } from '../utils/logger';
+import { CodedError } from '../errors/base.error';
+import { StatusCodes } from 'http-status-codes';
 
 class StripeClient {
   public stripe: Stripe;
@@ -28,11 +29,9 @@ class StripeClient {
     }
 
     try {
-      const paymentIntent = await this.stripe.paymentIntents.create(params);
-      return paymentIntent;
+      return await this.stripe.paymentIntents.create(params);
     } catch (error) {
-      logger.error('Error creating payment intent:', error);
-      throw new Error('Stripe payment intent creation failed');
+      throw new CodedError('Stripe payment intent creation failed', StatusCodes.INTERNAL_SERVER_ERROR, error);
     }
   }
 }
