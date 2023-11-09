@@ -2,36 +2,40 @@ import { Request, Response } from 'express';
 import subscriptionService from '../services/subscription.service';
 import { Subscription, Prisma } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
+import { errorHandler } from '../utils/error_handler';
+import { StatusCodes } from 'http-status-codes';
 
 export default class SubscriptionController {
   async create(req: Request, res: Response) {
+    if (!req.body) {
+      return res.status(StatusCodes.BAD_REQUEST).send({
+        message: 'Content can not be empty!',
+      });
+    }
+
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(StatusCodes.BAD_REQUEST).send({
+        message: 'You must send the userId!',
+      });
+    }
+
     try {
-      if (!req.body) {
-        return res.status(400).send({
-          message: 'You need to pass the userId',
-        });
-      }
-
-      const { userId } = req.body;
-
       const savedSubscription = await subscriptionService.save(userId);
 
-      res.status(201).send(savedSubscription);
+      res.status(StatusCodes.CREATED).send(savedSubscription);
     } catch (error) {
-      res.status(500).send({
-        message: 'Internal Server Error! Something went wrong while creating the subscription',
-      });
+      errorHandler(res, error);
     }
   }
 
   async findAll(req: Request, res: Response) {
     try {
       const subscriptions = await subscriptionService.retrieveAll(req.query as Pagination);
-      res.status(200).send(subscriptions);
+      res.status(StatusCodes.OK).send(subscriptions);
     } catch (error) {
-      res.status(500).send({
-        message: 'Internal Server Error! Something went wrong getting the subscriptions',
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -41,23 +45,21 @@ export default class SubscriptionController {
     try {
       const subscription = await subscriptionService.retrieveById(id);
       if (subscription) {
-        res.status(200).send(subscription);
+        res.status(StatusCodes.OK).send(subscription);
       } else {
-        res.status(404).send(`Subscription with id=${id} not found`);
+        res.status(StatusCodes.NOT_FOUND).send(`Subscription with id=${id} not found`);
       }
     } catch (error) {
-      res.status(500).send({
-        message: 'Internal Server Error!',
-      });
+      errorHandler(res, error);
     }
   }
 
   handleStripeHook(req: Request, res: Response) {
     try {
       subscriptionService.handleWebhook(req.body, (req.headers['stripe-signature'] as string) || '');
-      return res.sendStatus(200);
+      return res.sendStatus(StatusCodes.OK);
     } catch (err) {
-      return res.status(400).send(err);
+      return res.status(StatusCodes.BAD_REQUEST).send(err);
     }
   }
 
@@ -67,16 +69,15 @@ export default class SubscriptionController {
 
     try {
       const subscription = await subscriptionService.update(subscriptionToUpdate);
-      res.status(200).send(subscription);
+      res.status(StatusCodes.OK).send(subscription);
     } catch (error) {
+      //TODO: move these to the service
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        res.status(404).send({
+        res.status(StatusCodes.NOT_FOUND).send({
           message: `Subscription with id=${subscriptionToUpdate.id} not found`,
         });
       } else {
-        res.status(500).send({
-          message: 'Internal Server Error!',
-        });
+        errorHandler(res, error);
       }
     }
   }
@@ -86,18 +87,16 @@ export default class SubscriptionController {
 
     try {
       await subscriptionService.delete(id);
-      res.status(200).send({
+      res.status(StatusCodes.OK).send({
         message: `Subscription with id=${id} deleted`,
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        res.status(404).send({
+        res.status(StatusCodes.NOT_FOUND).send({
           message: `Subscription with id=${id} not found`,
         });
       } else {
-        res.status(500).send({
-          message: 'Internal Server Error!',
-        });
+        errorHandler(res, error);
       }
     }
   }

@@ -1,38 +1,39 @@
 import { Request, Response } from 'express';
 import garageService from '../services/garage.service';
-import { Garage, Prisma } from '@prisma/client';
+import { Garage } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
-import { AuthenticatedRequest } from '../interfaces/auth.interface';
+import { errorHandler } from '../utils/error_handler';
+import { StatusCodes } from 'http-status-codes';
 
 export default class GarageController {
   async create(req: Request, res: Response) {
-    try {
-      if (!req.body) {
-        return res.status(400).send({
-          message: 'Content can not be empty!',
-        });
-      }
+    if (!req.body)
+      return res.status(StatusCodes.BAD_REQUEST).send({
+        message: 'Content can not be empty!',
+      });
 
+    if (!req.token)
+      return res.status(StatusCodes.UNAUTHORIZED).send({
+        message: 'Authentication error : token not readable',
+      });
+
+    try {
       const garage: Garage = req.body;
-      garage.userId = (req as AuthenticatedRequest).token.id;
+      garage.userId = req.token.id;
       const savedGarage = await garageService.save(garage);
 
-      res.status(201).send(savedGarage);
+      res.status(StatusCodes.CREATED).send(savedGarage);
     } catch (error) {
-      res.status(500).send({
-        message: 'Internal Server Error! Something went wrong while creating the garage',
-      });
+      errorHandler(res, error);
     }
   }
 
   async findAll(req: Request, res: Response) {
     try {
       const garages = await garageService.retrieveAll(req.query as Pagination);
-      res.status(200).send(garages);
+      res.status(StatusCodes.OK).send(garages);
     } catch (error) {
-      res.status(500).send({
-        message: 'Internal Server Error! Something went wrong getting the garages',
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -42,14 +43,12 @@ export default class GarageController {
     try {
       const garage = await garageService.retrieveById(id);
       if (garage) {
-        res.status(200).send(garage);
+        res.status(StatusCodes.OK).send(garage);
       } else {
-        res.status(404).send(`Garage with id=${id} not found`);
+        res.status(StatusCodes.NOT_FOUND).send(`Garage with id=${id} not found`);
       }
     } catch (error) {
-      res.status(500).send({
-        message: 'Internal Server Error!',
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -59,17 +58,9 @@ export default class GarageController {
 
     try {
       const garage = await garageService.update(garageToUpdate);
-      res.status(200).send(garage);
+      res.status(StatusCodes.OK).send(garage);
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        res.status(404).send({
-          message: `Garage with id=${garageToUpdate.id} not found`,
-        });
-      } else {
-        res.status(500).send({
-          message: 'Internal Server Error!',
-        });
-      }
+      errorHandler(res, error);
     }
   }
 
@@ -78,19 +69,11 @@ export default class GarageController {
 
     try {
       await garageService.delete(id);
-      res.status(200).send({
+      res.status(StatusCodes.OK).send({
         message: `Garage with id=${id} deleted`,
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        res.status(404).send({
-          message: `Garage with id=${id} not found`,
-        });
-      } else {
-        res.status(500).send({
-          message: 'Internal Server Error!',
-        });
-      }
+      errorHandler(res, error);
     }
   }
 }

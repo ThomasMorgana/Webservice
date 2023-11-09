@@ -3,7 +3,6 @@
     "target": "ES2022",         
     "module": "CommonJS",      
     "outDir": "./build",                                       
-
     "strict": true,    
     "esModuleInterop": true,                         
     "forceConsistentCasingInFileNames": true,                                        
@@ -13,5 +12,9 @@
     "emitDecoratorMetadata": true,                    
 
     "resolveJsonModule": true
-  }
+  },
+  "include": ["./src/**/*"],
+  "files": [
+    "src/types/express_request_wrapper.d.ts"
+  ]
 }

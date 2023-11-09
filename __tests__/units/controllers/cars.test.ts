@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import CarController from '../../../src/controllers/car.controller';
+import { StatusCodes } from 'http-status-codes';
 
 describe('CarController', () => {
   const controller = new CarController();
@@ -13,13 +14,13 @@ describe('CarController', () => {
   };
 
   describe('create car', () => {
-    it('Empty body should return a 400', async () => {
+    it('Empty body should return a StatusCodes.BAD_REQUEST', async () => {
       const req = {} as Request;
       const res = mockResponse();
 
       await controller.create(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.BAD_REQUEST);
       expect(res.send).toHaveBeenCalled();
     });
   });
@@ -31,7 +32,7 @@ describe('CarController', () => {
 
       await controller.create(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.status).toHaveBeenCalledWith(StatusCodes.BAD_REQUEST);
       expect(res.send).toHaveBeenCalled();
     });
   });

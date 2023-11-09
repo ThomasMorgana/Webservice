@@ -4,59 +4,48 @@ import bcryptjs from 'bcryptjs';
 import { RefreshToken } from '@prisma/client';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt';
 import jwt from 'jsonwebtoken';
-import { IncorrectPasswordError, MailAlreadyUsedError, MailNotFoundError } from '../errors/auth.error';
 import resetTokenService from '../services/reset-token.service';
 import mailService from '../services/mail.service';
+import { errorHandler } from '../utils/error_handler';
+import { StatusCodes } from 'http-status-codes';
+import { logger } from '../utils/logger';
+import { EntityNotFoundError } from '../errors/base.error';
 
 export default class AuthController {
   async login(req: Request, res: Response) {
+    if (!req.body.password || !req.body.email) {
+      return res.status(StatusCodes.BAD_REQUEST).send('Password and email must be present and not empty');
+    }
     try {
-      if (!req.body.password || !req.body.email) {
-        return res.status(400).send('Password and email must be present and not empty');
-      }
-
       const user = await userService.login({ email: req.body.email, password: req.body.password });
 
       if (!user) {
-        return res.status(404).send("Those credentials don't match any users");
+        return res.status(StatusCodes.NOT_FOUND).send("Those credentials don't match any users");
       }
 
       const accessToken = await generateAccessToken(user);
       const refreshToken = await generateRefreshToken(user);
 
-      res.status(200).send({ user, token: accessToken, refreshToken });
+      res.status(StatusCodes.OK).send({ user, token: accessToken, refreshToken });
     } catch (error) {
-      if (error instanceof MailNotFoundError || error instanceof IncorrectPasswordError) {
-        res.status(404).send({ message: "Those credentials don't match any users" });
-      } else {
-        res.status(500).send({ message: 'Internal Server Error! Something went wrong while logging in' });
-      }
+      errorHandler(res, error);
     }
   }
 
   async register(req: Request, res: Response) {
+    if (!req.body.password || !req.body.email) {
+      return res.status(StatusCodes.BAD_REQUEST).send('Password and email must be present and not empty');
+    }
     try {
-      if (!req.body.password || !req.body.email) {
-        return res.status(400).send('Password and email must be present and not empty');
-      }
-
       const hashedPassword = await bcryptjs.hash(req.body.password, 12);
       const user = await userService.register({ email: req.body.email, password: hashedPassword });
 
       const accessToken = generateAccessToken(user);
       const refreshToken = generateRefreshToken(user);
 
-      res.status(200).send({ user, token: accessToken, refreshToken });
+      res.status(StatusCodes.OK).send({ user, token: accessToken, refreshToken });
     } catch (error) {
-      if (error instanceof MailAlreadyUsedError) {
-        res.status(409).send({
-          message: 'An account with this email already exists, try logging in!',
-        });
-      } else {
-        res.status(500).send({
-          message: 'Internal Server Error! Something went wrong while registering',
-        });
-      }
+      errorHandler(res, error);
     }
   }
 
@@ -64,7 +53,7 @@ export default class AuthController {
     const refreshToken: string = req.body.refreshToken;
 
     if (!refreshToken) {
-      return res.status(400).send('Please send the refreshToken in the body');
+      return res.status(StatusCodes.BAD_REQUEST).send('Please send the refreshToken in the body');
     }
 
     try {
@@ -72,15 +61,15 @@ export default class AuthController {
       const user = await userService.retrieveById(decoded.id);
 
       if (!user) {
-        return res.status(404).send('This refresh token did not match any users');
+        return res.status(StatusCodes.NOT_FOUND).send('This refresh token did not match any users');
       }
 
-      res.status(200).send({
+      res.status(StatusCodes.OK).send({
         accessToken: generateAccessToken(user),
         refreshToken: generateRefreshToken(user),
       });
     } catch (error) {
-      res.status(500).send('Internal Server Error! Something went wrong while generating a refresh token');
+      errorHandler(res, error);
     }
   }
 
@@ -88,32 +77,43 @@ export default class AuthController {
     const userEmail = req.body.email;
 
     if (!userEmail) {
-      return res.status(400).send('Please send the user email in the body');
+      return res.status(StatusCodes.BAD_REQUEST).send('Please send the user email in the body');
     }
 
-    const user = await userService.retrieveByEmail(userEmail);
+    try {
+      const user = await userService.retrieveByEmail(userEmail);
 
-    if (user) {
+      if (!user) return logger.error('User not found when generating reset token');
+
       const resetToken = await resetTokenService.generate(user.id);
-      mailService.onPasswordReset(user, resetToken.hashedToken);
+      await mailService.onPasswordReset(user, resetToken.hashedToken);
+    } catch (error) {
+      // We don't want to let the user know that the account does not exists
+      if (error instanceof EntityNotFoundError) {
+        logger.error(error);
+      } else {
+        errorHandler(res, error);
+      }
     }
 
-    res.status(200).send('If the email matches one of our accounts, an email has been sent with the reset token');
+    res
+      .status(StatusCodes.OK)
+      .send('If the email matches one of our accounts, an email has been sent with the reset token');
   }
 
   async resetPassword(req: Request, res: Response) {
     const { token, password } = req.body;
 
     if (!token || !password) {
-      return res.status(400).send('Please send the token and the password');
+      return res.status(StatusCodes.BAD_REQUEST).send('Please send the token and the password');
     }
 
     try {
       const user = await resetTokenService.getUserFromToken(token);
       const updatedUser = await userService.update({ ...user, password: await bcryptjs.hash(password, 12) });
-      res.status(200).send(updatedUser);
+      res.status(StatusCodes.OK).send(updatedUser);
     } catch (error) {
-      res.status(404).send('The token is either unknown, invalid, or already used');
+      errorHandler(res, error);
     }
   }
 }

@@ -1,5 +1,5 @@
 import { User } from '@prisma/client';
-import { logger } from '../utils/logger';
+import { CodedError } from '../errors/base.error';
 
 class BrevoClient {
   private TRANSACTIONAL_URL = 'https://api.brevo.com/v3/smtp/email';
@@ -40,10 +40,10 @@ class BrevoClient {
     try {
       const response = await fetch(this.TRANSACTIONAL_URL, requestOptions);
       if (!response.ok) {
-        throw new Error(`Failed to send email: ${response.statusText}`);
+        throw new CodedError(`Failed to send email: ${response.statusText}`);
       }
     } catch (error) {
-      logger.error(`Email sending error: ${error}`);
+      throw new CodedError(`Email sending error: ${error}`);
     }
   }
 }

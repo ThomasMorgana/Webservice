@@ -1,25 +1,24 @@
 import { Request, Response } from 'express';
 import userService from '../services/user.service';
-import { Prisma, Role, User } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
-import { AuthenticatedRequest } from '../interfaces/auth.interface';
-import { logger } from '../utils/logger';
-import { ActivationTokenInvalidError, UserNotFoundError } from '../errors/auth.error';
+import { errorHandler } from '../utils/error_handler';
+import { StatusCodes } from 'http-status-codes';
 
 export default class UserController {
   async create(req: Request, res: Response) {
     try {
       if (!req.body) {
-        return res.status(400).send({
+        return res.status(StatusCodes.BAD_REQUEST).send({
           message: 'Content cannot be empty!',
         });
       }
 
       const savedUser = await userService.register(req.body);
 
-      res.status(201).send(savedUser);
+      res.status(StatusCodes.CREATED).send(savedUser);
     } catch (error) {
-      res.status(500).send({
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
         message: 'Internal Server Error!',
       });
     }
@@ -28,16 +27,16 @@ export default class UserController {
   async createAdmin(req: Request, res: Response) {
     try {
       if (!req.body) {
-        return res.status(400).send({
+        return res.status(StatusCodes.BAD_REQUEST).send({
           message: 'Content cannot be empty!',
         });
       }
 
       const user: User = req.body;
-      const currentUserRole: Role = (req as AuthenticatedRequest).role;
+      const currentUserRole: Role = req.role;
 
       if (currentUserRole !== Role.ADMIN) {
-        return res.status(403).send({
+        return res.status(StatusCodes.FORBIDDEN).send({
           message: 'You must be an Admin to create an Admin',
         });
       }
@@ -45,9 +44,9 @@ export default class UserController {
       user.role = Role.ADMIN;
       const savedUser = await userService.register(user);
 
-      res.status(201).send(savedUser);
+      res.status(StatusCodes.CREATED).send(savedUser);
     } catch (error) {
-      res.status(500).send({
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
         message: 'Internal Server Error!',
       });
     }
@@ -56,31 +55,22 @@ export default class UserController {
   async activateAccount(req: Request, res: Response) {
     const token = req.query.token as string;
 
-    if (!token) return res.status(400).send('PLease provide the activation token as parameter');
+    if (!token) return res.status(StatusCodes.BAD_REQUEST).send('PLease provide the activation token as parameter');
 
     try {
       await userService.activateAccount(token);
-      res.status(200).send('activated');
+      res.status(StatusCodes.OK).send('activated');
     } catch (error) {
-      logger.error(error);
-      if (error instanceof ActivationTokenInvalidError) {
-        res.status(401).send(error);
-      } else if (error instanceof UserNotFoundError) {
-        res.status(404).send(error);
-      } else {
-        res.status(500).send(error);
-      }
+      errorHandler(res, error);
     }
   }
 
   async findAll(req: Request, res: Response) {
     try {
       const users = await userService.retrieveAll(req.query as Pagination);
-      res.status(200).send(users);
+      res.status(StatusCodes.OK).send(users);
     } catch (error) {
-      res.status(500).send({
-        message: 'Internal Server Error!',
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -90,14 +80,12 @@ export default class UserController {
     try {
       const user = await userService.retrieveById(id);
       if (user) {
-        res.status(200).send(user);
+        res.status(StatusCodes.OK).send(user);
       } else {
-        res.status(404).send(`User with id=${id} not found`);
+        res.status(StatusCodes.NOT_FOUND).send(`User with id=${id} not found`);
       }
     } catch (error) {
-      res.status(500).send({
-        message: 'Internal Server Error!',
-      });
+      errorHandler(res, error);
     }
   }
 
@@ -107,17 +95,9 @@ export default class UserController {
 
     try {
       const user = await userService.update(userToUpdate);
-      res.status(200).send(user);
+      res.status(StatusCodes.OK).send(user);
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        res.status(404).send({
-          message: `User with id=${userToUpdate.id} not found`,
-        });
-      } else {
-        res.status(500).send({
-          message: 'Internal Server Error!',
-        });
-      }
+      errorHandler(res, error);
     }
   }
 
@@ -126,19 +106,11 @@ export default class UserController {
 
     try {
       await userService.delete(id);
-      res.status(200).send({
+      res.status(StatusCodes.OK).send({
         message: `User with id=${id} deleted`,
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        res.status(404).send({
-          message: `User with id=${id} not found`,
-        });
-      } else {
-        res.status(500).send({
-          message: 'Internal Server Error!',
-        });
-      }
+      errorHandler(res, error);
     }
   }
 }

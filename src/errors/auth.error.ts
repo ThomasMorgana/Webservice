@@ -1,35 +1,38 @@
-export class MailNotFoundError extends Error {
+import { StatusCodes } from 'http-status-codes';
+import { CodedError } from './base.error';
+
+export class MailNotFoundError extends CodedError {
   constructor() {
-    super('No account with this email has been found');
+    super('No account with this email has been found', StatusCodes.NOT_FOUND);
   }
 }
 
-export class UserNotFoundError extends Error {
+export class UserNotFoundError extends CodedError {
   constructor() {
-    super('No corresponding account has been found');
+    super('No corresponding account has been found', StatusCodes.NOT_FOUND);
   }
 }
 
-export class MailAlreadyUsedError extends Error {
+export class MailAlreadyUsedError extends CodedError {
   constructor() {
-    super('An account with this email is already present');
+    super('An account with this email is already present', StatusCodes.CONFLICT);
   }
 }
 
-export class IncorrectPasswordError extends Error {
+export class IncorrectPasswordError extends CodedError {
   constructor() {
-    super("These credentials don't match");
+    super("These credentials don't match", StatusCodes.UNAUTHORIZED);
   }
 }
 
-export class ResetTokenInvalidError extends Error {
+export class ResetTokenInvalidError extends CodedError {
   constructor() {
-    super('This token is either invalid or already used');
+    super('This token is either invalid or already used', StatusCodes.UNAUTHORIZED);
   }
 }
 
-export class ActivationTokenInvalidError extends Error {
+export class ActivationTokenInvalidError extends CodedError {
   constructor() {
-    super("Le token d'activation est invalide");
+    super('The activation token is invalid', StatusCodes.UNAUTHORIZED);
   }
 }
