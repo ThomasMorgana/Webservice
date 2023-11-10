@@ -5,7 +5,7 @@ import { StatusCodes } from 'http-status-codes';
 class StripeClient {
   public stripe: Stripe;
 
-  constructor(private apiKey: string) {
+  constructor(apiKey: string) {
     this.stripe = new Stripe(apiKey, { typescript: true });
   }
 
