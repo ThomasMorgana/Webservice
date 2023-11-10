@@ -36,6 +36,7 @@ class UserService {
   }
 
   async register(credentials: Prisma.UserCreateInput): Promise<User> {
+    let newUser = null;
     try {
       const existingUser = await prisma.user.findUnique({
         where: {
@@ -47,7 +48,7 @@ class UserService {
         throw new MailAlreadyUsedError();
       }
 
-      const newUser = await prisma.user.create({
+      newUser = await prisma.user.create({
         data: {
           ...credentials,
         },
@@ -59,6 +60,7 @@ class UserService {
 
       return newUser;
     } catch (error) {
+      if (newUser) this.delete(newUser.id);
       if (error instanceof MailAlreadyUsedError) throw error;
       throw new InternalServerError(error);
     }

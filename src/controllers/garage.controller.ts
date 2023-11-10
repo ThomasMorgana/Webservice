@@ -65,9 +65,8 @@ export default class GarageController {
   }
 
   async delete(req: Request, res: Response) {
-    const id: number = parseInt(req.params.id);
-
     try {
+      const id: number = parseInt(req.params.id);
       await garageService.delete(id);
       res.status(StatusCodes.OK).send({
         message: `Garage with id=${id} deleted`,

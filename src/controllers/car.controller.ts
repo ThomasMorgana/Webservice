@@ -39,13 +39,14 @@ export default class CarController {
 
   async findOne(req: Request, res: Response) {
     const id: number = parseInt(req.params.id);
+    if (!id) return res.status(StatusCodes.BAD_REQUEST).send({ message: `ID: ${id} is invalid` });
 
     try {
       const car = await carService.retrieveById(id);
       if (car) {
         res.status(StatusCodes.OK).send(car);
       } else {
-        res.status(StatusCodes.NOT_FOUND).send(`Car with id=${id} not found`);
+        res.status(StatusCodes.NOT_FOUND).send({ message: `Car with id=${id} not found` });
       }
     } catch (error) {
       errorHandler(res, error);
@@ -53,10 +54,13 @@ export default class CarController {
   }
 
   async update(req: Request, res: Response) {
+    if (!req.body) return res.status(StatusCodes.BAD_REQUEST).send({ message: `You must provide a body` });
+
     const carToUpdate: Car = req.body;
-    carToUpdate.id = parseInt(req.params.id);
 
     try {
+      carToUpdate.id = parseInt(req.params.id);
+
       const car = await carService.update(carToUpdate);
       res.status(StatusCodes.OK).send(car);
     } catch (error) {
@@ -65,9 +69,8 @@ export default class CarController {
   }
 
   async delete(req: Request, res: Response) {
-    const id: number = parseInt(req.params.id);
-
     try {
+      const id: number = parseInt(req.params.id);
       await carService.delete(id);
       res.status(StatusCodes.OK).send({
         message: `Car with id=${id} deleted`,

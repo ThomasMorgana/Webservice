@@ -1,5 +1,6 @@
 import { User } from '@prisma/client';
 import { CodedError } from '../errors/base.error';
+import { logger } from '../utils/logger';
 
 class BrevoClient {
   private TRANSACTIONAL_URL = 'https://api.brevo.com/v3/smtp/email';
@@ -22,6 +23,8 @@ class BrevoClient {
       htmlcontent: content,
     };
 
+    const body = JSON.stringify(emailData);
+
     const requestOptions: RequestInit = {
       method: 'POST',
       mode: 'cors',
@@ -34,15 +37,18 @@ class BrevoClient {
       },
       redirect: 'follow',
       referrerPolicy: 'no-referrer',
-      body: JSON.stringify(emailData),
+      body: body,
     };
 
     try {
       const response = await fetch(this.TRANSACTIONAL_URL, requestOptions);
       if (!response.ok) {
-        throw new CodedError(`Failed to send email: ${response.statusText}`);
+        logger.info(`Failed to send email with data : ${body}`);
+        throw new CodedError(`Brevo failed to send email: ${response.statusText}`);
       }
+      logger.info(`Email sent with data : ${body}`);
     } catch (error) {
+      logger.info(`Failed to send email with data : ${body}`);
       throw new CodedError(`Email sending error: ${error}`);
     }
   }
