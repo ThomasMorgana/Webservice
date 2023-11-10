@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import subscriptionService from '../services/subscription.service';
-import { Subscription, Prisma } from '@prisma/client';
+import { Subscription } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import { errorHandler } from '../utils/error_handler';
 import { StatusCodes } from 'http-status-codes';
@@ -71,14 +71,7 @@ export default class SubscriptionController {
       const subscription = await subscriptionService.update(subscriptionToUpdate);
       res.status(StatusCodes.OK).send(subscription);
     } catch (error) {
-      //TODO: move these to the service
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        res.status(StatusCodes.NOT_FOUND).send({
-          message: `Subscription with id=${subscriptionToUpdate.id} not found`,
-        });
-      } else {
-        errorHandler(res, error);
-      }
+      errorHandler(res, error);
     }
   }
 
@@ -91,13 +84,7 @@ export default class SubscriptionController {
         message: `Subscription with id=${id} deleted`,
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        res.status(StatusCodes.NOT_FOUND).send({
-          message: `Subscription with id=${id} not found`,
-        });
-      } else {
-        errorHandler(res, error);
-      }
+      errorHandler(res, error);
     }
   }
 }

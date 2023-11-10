@@ -9,6 +9,7 @@ class MailService {
     try {
       await mailClient.sendMail(user, subject, content);
     } catch (error) {
+      console.log(error);
       throw new InternalServerError(error, 'Brevo error');
     }
   }

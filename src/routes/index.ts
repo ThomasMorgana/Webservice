@@ -14,11 +14,45 @@ export default class Routes {
   private registerRoutes(app: Application) {
     const apiRouter = Router();
 
+    /**
+     * @swagger
+     * tags:
+     *   name: Authentication
+     *   description: Account management
+     */
     apiRouter.use('/auth', AuthRoutes);
-    apiRouter.use('/cars', CarRoutes);
-    apiRouter.use('/garages', GarageRoutes);
+
+    /**
+     * @swagger
+     * tags:
+     *   name: Users
+     *   description: User management
+     */
     apiRouter.use('/users', UserRoutes);
-    apiRouter.use('/subscription', SubscriptionRoutes);
+
+    /**
+     * @swagger
+     * tags:
+     *   name: Subscriptions
+     *   description: Subscription management
+     */
+    apiRouter.use('/subscriptions', SubscriptionRoutes);
+
+    /**
+     * @swagger
+     * tags:
+     *   name: Cars
+     *   description: Cars management
+     */
+    apiRouter.use('/cars', CarRoutes);
+
+    /**
+     * @swagger
+     * tags:
+     *   name: Garages
+     *   description: Garage management
+     */
+    apiRouter.use('/garages', GarageRoutes);
 
     app.use('/api', apiRouter);
 
