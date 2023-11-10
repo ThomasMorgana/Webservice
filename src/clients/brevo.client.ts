@@ -1,6 +1,7 @@
 import { User } from '@prisma/client';
 import { CodedError } from '../errors/base.error';
 import { logger } from '../utils/logger';
+import { EmailData, RequestOptions } from '../config';
 
 class BrevoClient {
   private TRANSACTIONAL_URL = 'https://api.brevo.com/v3/smtp/email';
@@ -8,37 +9,9 @@ class BrevoClient {
   constructor(private apiKey: string) {}
 
   async sendMail(receiver: User, subject: string, content: string) {
-    const emailData = {
-      sender: {
-        name: 'Webservice',
-        email: 'no-reply@webservice.com',
-      },
-      to: [
-        {
-          name: receiver.email,
-          email: receiver.email,
-        },
-      ],
-      subject,
-      htmlcontent: content,
-    };
-
+    const emailData = EmailData(receiver, subject, content);
     const body = JSON.stringify(emailData);
-
-    const requestOptions: RequestInit = {
-      method: 'POST',
-      mode: 'cors',
-      cache: 'no-cache',
-      credentials: 'same-origin',
-      headers: {
-        'Content-Type': 'application/json',
-        accept: 'application/json',
-        'api-key': this.apiKey,
-      },
-      redirect: 'follow',
-      referrerPolicy: 'no-referrer',
-      body: body,
-    };
+    const requestOptions: RequestInit = RequestOptions(this.apiKey, body);
 
     try {
       const response = await fetch(this.TRANSACTIONAL_URL, requestOptions);

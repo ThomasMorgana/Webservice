@@ -12,6 +12,7 @@ export const seedUsers = async (prisma: PrismaClient) => {
     data: {
       email: 'admin@mail.com',
       role: Role.ADMIN,
+      active: true,
       password: await bcryptjs.hash('password', 12),
     },
   });
@@ -22,6 +23,7 @@ export const seedUsers = async (prisma: PrismaClient) => {
     await prisma.user.create({
       data: {
         email: faker.internet.email(),
+        active: i % 4 != 0,
         password: await bcryptjs.hash('password', 12),
       },
     });
