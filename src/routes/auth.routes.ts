@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import AuthController from '../controllers/auth.controller';
+import UserService from '../services/user.service';
+import ResetTokenService from '../services/reset-token.service';
 
 /**
  * @swagger
@@ -15,7 +17,7 @@ import AuthController from '../controllers/auth.controller';
  */
 class AuthRoutes {
   private router = Router();
-  private controller = new AuthController();
+  private controller = new AuthController(new UserService(), new ResetTokenService());
 
   constructor() {
     this.initializeRoutes();

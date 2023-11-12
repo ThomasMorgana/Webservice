@@ -6,14 +6,12 @@ import { logger } from '../utils/logger';
 import { BadRequestError, CodedError, EntityNotFoundError, InternalServerError } from '../errors/base.error';
 import { StatusCodes } from 'http-status-codes';
 
-const prisma = new PrismaClient();
-
-export class SubscriptionRepository {
-  constructor(private prisma: PrismaClient) {}
+export default class SubscriptionService {
+  private repository: PrismaClient = new PrismaClient();
 
   async save(userId: string): Promise<Subscription> {
     try {
-      const subscription = await this.prisma.subscription.create({
+      const subscription = await this.repository.subscription.create({
         data: {
           active: false,
           user: { connect: { id: userId } },
@@ -50,13 +48,13 @@ export class SubscriptionRepository {
         const { subscriptionId } = pi.metadata;
         if (!subscriptionId) throw new BadRequestError('No Subscription Id Defined');
 
-        const subscription = await this.prisma.subscription.findUnique({ where: { id: subscriptionId } });
+        const subscription = await this.repository.subscription.findUnique({ where: { id: subscriptionId } });
         if (!subscription) throw new EntityNotFoundError('Subscription', subscriptionId);
 
         subscription.active = true;
 
         try {
-          const updatedSubscription = await this.prisma.subscription.update({
+          const updatedSubscription = await this.repository.subscription.update({
             where: { id: subscriptionId },
             data: subscription,
           });
@@ -81,7 +79,7 @@ export class SubscriptionRepository {
   async retrieveAll(pagination?: Pagination): Promise<Subscription[]> {
     const { page = 0, step = 10 } = pagination || {};
     try {
-      const subscriptions = await this.prisma.subscription.findMany({
+      const subscriptions = await this.repository.subscription.findMany({
         take: +step,
         skip: +step * +page,
         orderBy: { id: 'asc' },
@@ -94,7 +92,7 @@ export class SubscriptionRepository {
 
   async retrieveById(id: string): Promise<Subscription | null> {
     try {
-      return this.prisma.subscription.findUnique({ where: { id } });
+      return this.repository.subscription.findUnique({ where: { id } });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
         throw new EntityNotFoundError('Subscription', id);
@@ -106,7 +104,7 @@ export class SubscriptionRepository {
 
   async update(subscription: Subscription): Promise<Subscription> {
     try {
-      return this.prisma.subscription.update({
+      return this.repository.subscription.update({
         where: { id: subscription.id },
         data: { ...subscription },
       });
@@ -121,7 +119,7 @@ export class SubscriptionRepository {
 
   async delete(id: string): Promise<string> {
     try {
-      const result = await this.prisma.subscription.delete({ where: { id }, select: { id: true } });
+      const result = await this.repository.subscription.delete({ where: { id }, select: { id: true } });
       return result.id;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
@@ -132,5 +130,3 @@ export class SubscriptionRepository {
     }
   }
 }
-
-export default new SubscriptionRepository(prisma);

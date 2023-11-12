@@ -1,11 +1,16 @@
 import { Request, Response } from 'express';
-import userService from '../services/user.service';
 import { Role, User } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import { errorHandler } from '../utils/error_handler';
 import { StatusCodes } from 'http-status-codes';
+import UserService from '../services/user.service';
 
 export default class UserController {
+  private userService: UserService;
+
+  constructor(service: UserService) {
+    this.userService = service;
+  }
   async create(req: Request, res: Response) {
     try {
       if (!req.body) {
@@ -14,7 +19,7 @@ export default class UserController {
         });
       }
 
-      const savedUser = await userService.register(req.body);
+      const savedUser = await this.userService.register(req.body);
 
       res.status(StatusCodes.CREATED).send(savedUser);
     } catch (error) {
@@ -42,7 +47,7 @@ export default class UserController {
       }
 
       user.role = Role.ADMIN;
-      const savedUser = await userService.register(user);
+      const savedUser = await this.userService.register(user);
 
       res.status(StatusCodes.CREATED).send(savedUser);
     } catch (error) {
@@ -58,7 +63,7 @@ export default class UserController {
     if (!token) return res.status(StatusCodes.BAD_REQUEST).send('PLease provide the activation token as parameter');
 
     try {
-      await userService.activateAccount(token);
+      await this.userService.activateAccount(token);
       res.status(StatusCodes.OK).send('activated');
     } catch (error) {
       errorHandler(res, error);
@@ -67,7 +72,7 @@ export default class UserController {
 
   async findAll(req: Request, res: Response) {
     try {
-      const users = await userService.retrieveAll(req.query as Pagination);
+      const users = await this.userService.retrieveAll(req.query as Pagination);
       res.status(StatusCodes.OK).send(users);
     } catch (error) {
       errorHandler(res, error);
@@ -78,7 +83,7 @@ export default class UserController {
     const id: string = req.params.id;
 
     try {
-      const user = await userService.retrieveById(id);
+      const user = await this.userService.retrieveById(id);
       if (user) {
         res.status(StatusCodes.OK).send(user);
       } else {
@@ -94,7 +99,7 @@ export default class UserController {
     userToUpdate.id = req.params.id;
 
     try {
-      const user = await userService.update(userToUpdate);
+      const user = await this.userService.update(userToUpdate);
       res.status(StatusCodes.OK).send(user);
     } catch (error) {
       errorHandler(res, error);
@@ -105,7 +110,7 @@ export default class UserController {
     const id: string = req.params.id;
 
     try {
-      await userService.delete(id);
+      await this.userService.delete(id);
       res.status(StatusCodes.OK).send({
         message: `User with id=${id} deleted`,
       });

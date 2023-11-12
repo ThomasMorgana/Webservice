@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import CarController from '../controllers/car.controller';
 import { authenticateToken } from '../middlewares/auth.middleware';
+import CarService from '../services/car.service';
 
 /**
  * @swagger
@@ -70,7 +71,7 @@ import { authenticateToken } from '../middlewares/auth.middleware';
  */
 class CarRoutes {
   private router = Router();
-  private controller = new CarController();
+  private controller = new CarController(new CarService());
 
   constructor() {
     this.initializeRoutes();

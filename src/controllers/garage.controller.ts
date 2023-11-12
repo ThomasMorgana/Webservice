@@ -1,18 +1,24 @@
 import { Request, Response } from 'express';
-import garageService from '../services/garage.service';
 import { Garage } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import { errorHandler } from '../utils/error_handler';
 import { StatusCodes } from 'http-status-codes';
+import { GarageService } from '../services/garage.service';
 
 export default class GarageController {
+  private garageService: GarageService;
+
+  constructor(service: GarageService) {
+    this.garageService = service;
+  }
+
   async create(req: Request, res: Response) {
     if (!req.body)
       return res.status(StatusCodes.BAD_REQUEST).send({
         message: 'Content can not be empty!',
       });
 
-    if (!req.token)
+    if (!req.token || !req.token.id)
       return res.status(StatusCodes.UNAUTHORIZED).send({
         message: 'Authentication error : token not readable',
       });
@@ -20,7 +26,7 @@ export default class GarageController {
     try {
       const garage: Garage = req.body;
       garage.userId = req.token.id;
-      const savedGarage = await garageService.save(garage);
+      const savedGarage = await this.garageService.save(garage);
 
       res.status(StatusCodes.CREATED).send(savedGarage);
     } catch (error) {
@@ -30,7 +36,7 @@ export default class GarageController {
 
   async findAll(req: Request, res: Response) {
     try {
-      const garages = await garageService.retrieveAll(req.query as Pagination);
+      const garages = await this.garageService.retrieveAll(req.query as Pagination);
       res.status(StatusCodes.OK).send(garages);
     } catch (error) {
       errorHandler(res, error);
@@ -41,12 +47,8 @@ export default class GarageController {
     const id: number = parseInt(req.params.id);
 
     try {
-      const garage = await garageService.retrieveById(id);
-      if (garage) {
-        res.status(StatusCodes.OK).send(garage);
-      } else {
-        res.status(StatusCodes.NOT_FOUND).send(`Garage with id=${id} not found`);
-      }
+      const garage = await this.garageService.retrieveById(id);
+      res.status(StatusCodes.OK).send(garage);
     } catch (error) {
       errorHandler(res, error);
     }
@@ -57,7 +59,7 @@ export default class GarageController {
     garageToUpdate.id = parseInt(req.params.id);
 
     try {
-      const garage = await garageService.update(garageToUpdate);
+      const garage = await this.garageService.update(garageToUpdate);
       res.status(StatusCodes.OK).send(garage);
     } catch (error) {
       errorHandler(res, error);
@@ -67,7 +69,7 @@ export default class GarageController {
   async delete(req: Request, res: Response) {
     try {
       const id: number = parseInt(req.params.id);
-      await garageService.delete(id);
+      await this.garageService.delete(id);
       res.status(StatusCodes.OK).send({
         message: `Garage with id=${id} deleted`,
       });

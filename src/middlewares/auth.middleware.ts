@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import userService from '../services/user.service';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
+import UserService from '../services/user.service';
+
+const userService = new UserService();
 
 export const authenticateToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
