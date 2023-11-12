@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import GarageController from '../controllers/garage.controller';
 import { authenticateToken } from '../middlewares/auth.middleware';
+import { GarageService } from '../services/garage.service';
 
 /**
  * @swagger
@@ -39,7 +40,7 @@ import { authenticateToken } from '../middlewares/auth.middleware';
  */
 class GarageRoutes {
   private router = Router();
-  private controller = new GarageController();
+  private controller = new GarageController(new GarageService());
 
   constructor() {
     this.initializeRoutes();

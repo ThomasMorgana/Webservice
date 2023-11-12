@@ -3,15 +3,13 @@ import { CodedError } from '../errors/base.error';
 import { logger } from '../utils/logger';
 import { EmailData, RequestOptions } from '../config';
 
-class BrevoClient {
+export default class BrevoClient {
   private TRANSACTIONAL_URL = 'https://api.brevo.com/v3/smtp/email';
-
-  constructor(private apiKey: string) {}
 
   async sendMail(receiver: User, subject: string, content: string) {
     const emailData = EmailData(receiver, subject, content);
     const body = JSON.stringify(emailData);
-    const requestOptions: RequestInit = RequestOptions(this.apiKey, body);
+    const requestOptions: RequestInit = RequestOptions(body);
 
     try {
       const response = await fetch(this.TRANSACTIONAL_URL, requestOptions);
@@ -26,7 +24,3 @@ class BrevoClient {
     }
   }
 }
-
-const brevoClient = new BrevoClient(process.env.BREVO_API_KEY as string);
-
-export default brevoClient;

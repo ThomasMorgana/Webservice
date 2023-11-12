@@ -3,12 +3,12 @@ import { randomBytes } from 'crypto';
 import { ResetTokenInvalidError } from '../errors/auth.error';
 import { EntityNotFoundError } from '../errors/base.error';
 
-const prisma = new PrismaClient();
+export default class ResetTokenService {
+  private repository: PrismaClient = new PrismaClient();
 
-class ResetTokenService {
   async generate(userId: string): Promise<ResetToken> {
     const generatedToken = randomBytes(32).toString('hex');
-    const resetToken = await prisma.resetToken.create({
+    const resetToken = await this.repository.resetToken.create({
       data: {
         hashedToken: generatedToken,
         user: { connect: { id: userId } },
@@ -18,7 +18,7 @@ class ResetTokenService {
   }
 
   async getUserFromToken(token: string): Promise<User> {
-    const resetToken = await prisma.resetToken.findFirst({
+    const resetToken = await this.repository.resetToken.findFirst({
       where: { hashedToken: token, revoked: false },
     });
 
@@ -26,12 +26,12 @@ class ResetTokenService {
       throw new ResetTokenInvalidError();
     }
 
-    await prisma.resetToken.update({
+    await this.repository.resetToken.update({
       where: { id: resetToken.id },
       data: { revoked: true },
     });
 
-    const user = await prisma.user.findUnique({
+    const user = await this.repository.user.findUnique({
       where: { id: resetToken.userId },
     });
 
@@ -42,5 +42,3 @@ class ResetTokenService {
     return user;
   }
 }
-
-export default new ResetTokenService();

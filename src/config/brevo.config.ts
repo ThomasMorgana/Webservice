@@ -17,7 +17,7 @@ export const EmailData = (receiver: User, subject: string, content: string) => {
   };
 };
 
-export const RequestOptions = (apiKey: string, body: string) => {
+export const RequestOptions = (body: string) => {
   return {
     method: 'POST',
     mode: 'cors',
@@ -26,7 +26,7 @@ export const RequestOptions = (apiKey: string, body: string) => {
     headers: {
       'Content-Type': 'application/json',
       accept: 'application/json',
-      'api-key': apiKey,
+      'api-key': process.env.BREVO_API_KEY,
     },
     redirect: 'follow',
     referrerPolicy: 'no-referrer',

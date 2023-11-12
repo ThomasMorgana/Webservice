@@ -2,13 +2,12 @@ import { PrismaClient, Garage, Prisma } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import { EntityNotFoundError, InternalServerError } from '../errors/base.error';
 
-const prisma = new PrismaClient();
 export class GarageService {
-  constructor(private prisma: PrismaClient) {}
+  private repository: PrismaClient = new PrismaClient();
 
   async save(garage: Garage): Promise<Garage> {
     try {
-      return this.prisma.garage.create({
+      return this.repository.garage.create({
         data: { ...garage },
       });
     } catch (error) {
@@ -19,7 +18,7 @@ export class GarageService {
   async retrieveAll(pagination?: Pagination): Promise<Garage[]> {
     const { page = 0, step = 10 } = pagination || {};
     try {
-      const garages = await this.prisma.garage.findMany({
+      const garages = await this.repository.garage.findMany({
         take: +step,
         skip: +step * +page,
         orderBy: { id: 'asc' },
@@ -30,9 +29,11 @@ export class GarageService {
     }
   }
 
-  async retrieveById(id: number): Promise<Garage | null> {
+  async retrieveById(id: number): Promise<Garage> {
     try {
-      return this.prisma.garage.findUnique({ where: { id } });
+      const garage = await this.repository.garage.findUnique({ where: { id } });
+      if (!garage) throw new EntityNotFoundError('Garage', id.toString());
+      return garage;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
         throw new EntityNotFoundError('Garage', id.toString());
@@ -44,7 +45,7 @@ export class GarageService {
 
   async update(garage: Garage): Promise<Garage> {
     try {
-      return this.prisma.garage.update({
+      return this.repository.garage.update({
         where: { id: garage.id },
         data: { ...garage },
       });
@@ -59,7 +60,7 @@ export class GarageService {
 
   async delete(id: number): Promise<number> {
     try {
-      const result = await this.prisma.garage.delete({
+      const result = await this.repository.garage.delete({
         where: { id },
         select: { id: true },
       });
@@ -73,5 +74,3 @@ export class GarageService {
     }
   }
 }
-
-export default new GarageService(prisma);

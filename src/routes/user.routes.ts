@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import UserController from '../controllers/user.controller';
 import { authenticateToken } from '../middlewares/auth.middleware';
+import UserService from '../services/user.service';
 
 /**
  * @swagger
@@ -52,7 +53,7 @@ import { authenticateToken } from '../middlewares/auth.middleware';
  */
 class UserRoutes {
   private router = Router();
-  private controller = new UserController();
+  private controller = new UserController(new UserService());
 
   constructor() {
     this.initializeRoutes();

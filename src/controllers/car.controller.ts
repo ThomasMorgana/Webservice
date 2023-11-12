@@ -1,11 +1,17 @@
 import { Request, Response } from 'express';
-import carService from '../services/car.service';
+import CarService from '../services/car.service';
 import { Car } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import { errorHandler } from '../utils/error_handler';
 import { StatusCodes } from 'http-status-codes';
 
 export default class CarController {
+  private carService: CarService;
+
+  constructor(service: CarService) {
+    this.carService = service;
+  }
+
   async create(req: Request, res: Response) {
     if (!req.body)
       return res.status(StatusCodes.BAD_REQUEST).send({
@@ -21,7 +27,7 @@ export default class CarController {
     car.userId = req.token.id;
 
     try {
-      const savedCar = await carService.save(car);
+      const savedCar = await this.carService.save(car);
       res.status(StatusCodes.CREATED).send(savedCar);
     } catch (error) {
       errorHandler(res, error);
@@ -30,7 +36,7 @@ export default class CarController {
 
   async findAll(req: Request, res: Response) {
     try {
-      const cars = await carService.retrieveAll(req.query as Pagination);
+      const cars = await this.carService.retrieveAll(req.query as Pagination);
       res.status(StatusCodes.OK).send(cars);
     } catch (error) {
       errorHandler(res, error);
@@ -42,7 +48,7 @@ export default class CarController {
     if (!id) return res.status(StatusCodes.BAD_REQUEST).send({ message: `ID: ${id} is invalid` });
 
     try {
-      const car = await carService.retrieveById(id);
+      const car = await this.carService.retrieveById(id);
       if (car) {
         res.status(StatusCodes.OK).send(car);
       } else {
@@ -61,7 +67,7 @@ export default class CarController {
     try {
       carToUpdate.id = parseInt(req.params.id);
 
-      const car = await carService.update(carToUpdate);
+      const car = await this.carService.update(carToUpdate);
       res.status(StatusCodes.OK).send(car);
     } catch (error) {
       errorHandler(res, error);
@@ -71,7 +77,7 @@ export default class CarController {
   async delete(req: Request, res: Response) {
     try {
       const id: number = parseInt(req.params.id);
-      await carService.delete(id);
+      await this.carService.delete(id);
       res.status(StatusCodes.OK).send({
         message: `Car with id=${id} deleted`,
       });

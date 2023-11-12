@@ -13,7 +13,7 @@
 
     "resolveJsonModule": true
   },
-  "include": ["./src/**/*"],
+  "include": ["./src/**/*", "./__tests__/**/*"],
   "files": [
     "src/types/express_request_wrapper.d.ts"
   ]

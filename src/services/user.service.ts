@@ -9,15 +9,14 @@ import {
   MailNotFoundError,
   UserNotFoundError,
 } from '../errors/auth.error';
-import mailService from './mail.service';
 import { generateActivationToken } from '../utils/jwt';
 import { EntityNotFoundError, InternalServerError } from '../errors/base.error';
 
-const prisma = new PrismaClient();
+export default class UserService {
+  private repository: PrismaClient = new PrismaClient();
 
-class UserService {
   async login(credentials: Prisma.UserCreateInput): Promise<User | null> {
-    const user = await prisma.user.findUnique({
+    const user = await this.repository.user.findUnique({
       where: {
         email: credentials.email,
       },
@@ -35,10 +34,10 @@ class UserService {
     return user;
   }
 
-  async register(credentials: Prisma.UserCreateInput): Promise<User> {
-    let newUser = null;
+  async register(credentials: Prisma.UserCreateInput): Promise<{ user: User; activationToken: string }> {
+    let user = null;
     try {
-      const existingUser = await prisma.user.findUnique({
+      const existingUser = await this.repository.user.findUnique({
         where: {
           email: credentials.email,
         },
@@ -48,19 +47,17 @@ class UserService {
         throw new MailAlreadyUsedError();
       }
 
-      newUser = await prisma.user.create({
+      user = await this.repository.user.create({
         data: {
           ...credentials,
         },
       });
 
-      const activationToken = await generateActivationToken(newUser);
+      const activationToken = await generateActivationToken(user);
 
-      await mailService.onRegister(newUser, activationToken);
-
-      return newUser;
+      return { user, activationToken };
     } catch (error) {
-      if (newUser) this.delete(newUser.id);
+      if (user) this.delete(user.id);
       if (error instanceof MailAlreadyUsedError) throw error;
       throw new InternalServerError(error);
     }
@@ -86,7 +83,7 @@ class UserService {
     const page = pagination?.page || 0;
     const step = pagination?.step || 10;
 
-    const users = await prisma.user.findMany({
+    const users = await this.repository.user.findMany({
       take: +step,
       skip: +step * +page,
       orderBy: { id: 'asc' },
@@ -96,12 +93,12 @@ class UserService {
   }
 
   async retrieveById(id: string): Promise<User | null> {
-    return await prisma.user.findUnique({ where: { id } });
+    return await this.repository.user.findUnique({ where: { id } });
   }
 
   async retrieveByEmail(email: string): Promise<User | null> {
     try {
-      return await prisma.user.findUnique({ where: { email } });
+      return await this.repository.user.findUnique({ where: { email } });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
         throw new EntityNotFoundError('User', email);
@@ -113,7 +110,7 @@ class UserService {
 
   async update(user: User): Promise<User> {
     try {
-      return await prisma.user.update({
+      return await this.repository.user.update({
         where: { id: user.id },
         data: { ...user },
       });
@@ -128,7 +125,7 @@ class UserService {
 
   async delete(id: string): Promise<string> {
     try {
-      const deletedUser = await prisma.user.delete({ where: { id } });
+      const deletedUser = await this.repository.user.delete({ where: { id } });
       return deletedUser.id;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
@@ -139,5 +136,3 @@ class UserService {
     }
   }
 }
-
-export default new UserService();

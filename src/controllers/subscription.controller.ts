@@ -1,11 +1,17 @@
 import { Request, Response } from 'express';
-import subscriptionService from '../services/subscription.service';
 import { Subscription } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import { errorHandler } from '../utils/error_handler';
 import { StatusCodes } from 'http-status-codes';
+import SubscriptionService from '../services/subscription.service';
 
 export default class SubscriptionController {
+  private subscriptionService: SubscriptionService;
+
+  constructor(service: SubscriptionService) {
+    this.subscriptionService = service;
+  }
+
   async create(req: Request, res: Response) {
     if (!req.body) {
       return res.status(StatusCodes.BAD_REQUEST).send({
@@ -22,7 +28,7 @@ export default class SubscriptionController {
     }
 
     try {
-      const savedSubscription = await subscriptionService.save(userId);
+      const savedSubscription = await this.subscriptionService.save(userId);
 
       res.status(StatusCodes.CREATED).send(savedSubscription);
     } catch (error) {
@@ -32,7 +38,7 @@ export default class SubscriptionController {
 
   async findAll(req: Request, res: Response) {
     try {
-      const subscriptions = await subscriptionService.retrieveAll(req.query as Pagination);
+      const subscriptions = await this.subscriptionService.retrieveAll(req.query as Pagination);
       res.status(StatusCodes.OK).send(subscriptions);
     } catch (error) {
       errorHandler(res, error);
@@ -43,7 +49,7 @@ export default class SubscriptionController {
     const id: string = req.params.id;
 
     try {
-      const subscription = await subscriptionService.retrieveById(id);
+      const subscription = await this.subscriptionService.retrieveById(id);
       if (subscription) {
         res.status(StatusCodes.OK).send(subscription);
       } else {
@@ -56,7 +62,7 @@ export default class SubscriptionController {
 
   handleStripeHook(req: Request, res: Response) {
     try {
-      subscriptionService.handleWebhook(req.body, (req.headers['stripe-signature'] as string) || '');
+      this.subscriptionService.handleWebhook(req.body, (req.headers['stripe-signature'] as string) || '');
       return res.sendStatus(StatusCodes.OK);
     } catch (err) {
       return res.status(StatusCodes.BAD_REQUEST).send(err);
@@ -68,7 +74,7 @@ export default class SubscriptionController {
     subscriptionToUpdate.id = req.params.id;
 
     try {
-      const subscription = await subscriptionService.update(subscriptionToUpdate);
+      const subscription = await this.subscriptionService.update(subscriptionToUpdate);
       res.status(StatusCodes.OK).send(subscription);
     } catch (error) {
       errorHandler(res, error);
@@ -79,7 +85,7 @@ export default class SubscriptionController {
     const id: string = req.params.id;
 
     try {
-      await subscriptionService.delete(id);
+      await this.subscriptionService.delete(id);
       res.status(StatusCodes.OK).send({
         message: `Subscription with id=${id} deleted`,
       });
