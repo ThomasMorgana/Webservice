@@ -236,7 +236,7 @@ class SubscriptionRoutes {
      *                 message:
      *                   type: string
      *               example:
-     *                 message: Subscription with id=${id} deleted
+     *                 message: Subscription deleted
      *       404:
      *         description: Subscription not found
      *         content:

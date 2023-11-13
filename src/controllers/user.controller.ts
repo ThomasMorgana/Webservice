@@ -31,7 +31,7 @@ export default class UserController {
 
   async createAdmin(req: Request, res: Response) {
     try {
-      if (!req.body) {
+      if (!req.body || !req.role) {
         return res.status(StatusCodes.BAD_REQUEST).send({
           message: 'Content cannot be empty!',
         });
@@ -87,7 +87,7 @@ export default class UserController {
       if (user) {
         res.status(StatusCodes.OK).send(user);
       } else {
-        res.status(StatusCodes.NOT_FOUND).send(`User with id=${id} not found`);
+        res.status(StatusCodes.NOT_FOUND).send(`User not found`);
       }
     } catch (error) {
       errorHandler(res, error);
@@ -112,7 +112,7 @@ export default class UserController {
     try {
       await this.userService.delete(id);
       res.status(StatusCodes.OK).send({
-        message: `User with id=${id} deleted`,
+        message: `User deleted`,
       });
     } catch (error) {
       errorHandler(res, error);
