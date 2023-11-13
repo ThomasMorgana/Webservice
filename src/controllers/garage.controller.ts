@@ -12,7 +12,7 @@ export default class GarageController {
     this.garageService = service;
   }
 
-  async create(req: Request, res: Response) {
+  create = async (req: Request, res: Response) => {
     if (!req.body)
       return res.status(StatusCodes.BAD_REQUEST).send({
         message: 'Content can not be empty!',
@@ -32,18 +32,18 @@ export default class GarageController {
     } catch (error) {
       errorHandler(res, error);
     }
-  }
+  };
 
-  async findAll(req: Request, res: Response) {
+  findAll = async (req: Request, res: Response) => {
     try {
       const garages = await this.garageService.retrieveAll(req.query as Pagination);
       res.status(StatusCodes.OK).send(garages);
     } catch (error) {
       errorHandler(res, error);
     }
-  }
+  };
 
-  async findOne(req: Request, res: Response) {
+  findOne = async (req: Request, res: Response) => {
     const id: number = parseInt(req.params.id);
 
     try {
@@ -52,9 +52,9 @@ export default class GarageController {
     } catch (error) {
       errorHandler(res, error);
     }
-  }
+  };
 
-  async update(req: Request, res: Response) {
+  update = async (req: Request, res: Response) => {
     const garageToUpdate: Garage = req.body;
     garageToUpdate.id = parseInt(req.params.id);
 
@@ -64,9 +64,9 @@ export default class GarageController {
     } catch (error) {
       errorHandler(res, error);
     }
-  }
+  };
 
-  async delete(req: Request, res: Response) {
+  delete = async (req: Request, res: Response) => {
     try {
       const id: number = parseInt(req.params.id);
       await this.garageService.delete(id);
@@ -76,5 +76,5 @@ export default class GarageController {
     } catch (error) {
       errorHandler(res, error);
     }
-  }
+  };
 }

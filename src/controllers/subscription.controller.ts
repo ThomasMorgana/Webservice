@@ -12,7 +12,7 @@ export default class SubscriptionController {
     this.subscriptionService = service;
   }
 
-  async create(req: Request, res: Response) {
+  create = async (req: Request, res: Response) => {
     if (!req.body) {
       return res.status(StatusCodes.BAD_REQUEST).send({
         message: 'Content can not be empty!',
@@ -34,18 +34,18 @@ export default class SubscriptionController {
     } catch (error) {
       errorHandler(res, error);
     }
-  }
+  };
 
-  async findAll(req: Request, res: Response) {
+  findAll = async (req: Request, res: Response) => {
     try {
       const subscriptions = await this.subscriptionService.retrieveAll(req.query as Pagination);
       res.status(StatusCodes.OK).send(subscriptions);
     } catch (error) {
       errorHandler(res, error);
     }
-  }
+  };
 
-  async findOne(req: Request, res: Response) {
+  findOne = async (req: Request, res: Response) => {
     const id: string = req.params.id;
 
     try {
@@ -58,18 +58,18 @@ export default class SubscriptionController {
     } catch (error) {
       errorHandler(res, error);
     }
-  }
+  };
 
-  handleStripeHook(req: Request, res: Response) {
+  handleStripeHook = (req: Request, res: Response) => {
     try {
       this.subscriptionService.handleWebhook(req.body, (req.headers['stripe-signature'] as string) || '');
       return res.sendStatus(StatusCodes.OK);
     } catch (err) {
       return res.status(StatusCodes.BAD_REQUEST).send(err);
     }
-  }
+  };
 
-  async update(req: Request, res: Response) {
+  update = async (req: Request, res: Response) => {
     const subscriptionToUpdate: Subscription = req.body;
     subscriptionToUpdate.id = req.params.id;
 
@@ -79,9 +79,9 @@ export default class SubscriptionController {
     } catch (error) {
       errorHandler(res, error);
     }
-  }
+  };
 
-  async delete(req: Request, res: Response) {
+  delete = async (req: Request, res: Response) => {
     const id: string = req.params.id;
 
     try {
@@ -92,5 +92,5 @@ export default class SubscriptionController {
     } catch (error) {
       errorHandler(res, error);
     }
-  }
+  };
 }

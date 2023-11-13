@@ -6,13 +6,13 @@ import { errorHandler } from '../utils/error_handler';
 import { StatusCodes } from 'http-status-codes';
 
 export default class CarController {
-  private carService: CarService;
+  private carService: CarService = new CarService();
 
-  constructor(service: CarService) {
+  constructor(private service: CarService) {
     this.carService = service;
   }
 
-  async create(req: Request, res: Response) {
+  create = async (req: Request, res: Response) => {
     if (!req.body)
       return res.status(StatusCodes.BAD_REQUEST).send({
         message: 'Content can not be empty!',
@@ -32,18 +32,18 @@ export default class CarController {
     } catch (error) {
       errorHandler(res, error);
     }
-  }
+  };
 
-  async findAll(req: Request, res: Response) {
+  findAll = async (req: Request, res: Response) => {
     try {
       const cars = await this.carService.retrieveAll(req.query as Pagination);
       res.status(StatusCodes.OK).send(cars);
     } catch (error) {
       errorHandler(res, error);
     }
-  }
+  };
 
-  async findOne(req: Request, res: Response) {
+  findOne = async (req: Request, res: Response) => {
     const id: number = parseInt(req.params.id);
     if (!id) return res.status(StatusCodes.BAD_REQUEST).send({ message: `ID: ${id} is invalid` });
 
@@ -57,9 +57,9 @@ export default class CarController {
     } catch (error) {
       errorHandler(res, error);
     }
-  }
+  };
 
-  async update(req: Request, res: Response) {
+  update = async (req: Request, res: Response) => {
     if (!req.body) return res.status(StatusCodes.BAD_REQUEST).send({ message: `You must provide a body` });
 
     const carToUpdate: Car = req.body;
@@ -72,9 +72,9 @@ export default class CarController {
     } catch (error) {
       errorHandler(res, error);
     }
-  }
+  };
 
-  async delete(req: Request, res: Response) {
+  delete = async (req: Request, res: Response) => {
     try {
       const id: number = parseInt(req.params.id);
       await this.carService.delete(id);
@@ -84,5 +84,5 @@ export default class CarController {
     } catch (error) {
       errorHandler(res, error);
     }
-  }
+  };
 }

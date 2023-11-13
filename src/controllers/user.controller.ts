@@ -31,7 +31,7 @@ export default class UserController {
 
   async createAdmin(req: Request, res: Response) {
     try {
-      if (!req.body) {
+      if (!req.body || !req.role) {
         return res.status(StatusCodes.BAD_REQUEST).send({
           message: 'Content cannot be empty!',
         });

@@ -70,6 +70,7 @@
         "jsonwebtoken": "^9.0.1",
         "pino": "^8.16.1",
         "prom-client": "^15.0.0",
+        "redis": "^4.6.10",
         "stripe": "^14.3.0",
         "swagger-jsdoc": "^6.2.8",
         "swagger-ui-express": "^5.0.0"
