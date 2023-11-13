@@ -2,6 +2,7 @@ import { Router } from 'express';
 import CarController from '../controllers/car.controller';
 import { authenticateToken } from '../middlewares/auth.middleware';
 import CarService from '../services/car.service';
+import { enableCache } from '../middlewares/cache.middleware';
 
 /**
  * @swagger
@@ -143,7 +144,7 @@ class CarRoutes {
      *             schema:
      *               $ref: '#/components/schemas/Cars'
      */
-    this.router.get('/', this.controller.findAll);
+    this.router.get('/', enableCache, this.controller.findAll);
 
     /**
      * @swagger
@@ -189,7 +190,7 @@ class CarRoutes {
      *                 message:
      *                   type: string
      *               example:
-     *                 message: Car with id=${id} not found
+     *                 message: Car not found
      */
     this.router.get('/:id', this.controller.findOne);
 
@@ -228,7 +229,7 @@ class CarRoutes {
      *                 message:
      *                   type: string
      *               example:
-     *                 message: Car with id=${id} deleted
+     *                 message: Car deleted
      *       400:
      *         description: Bad request
      *         content:
@@ -251,7 +252,7 @@ class CarRoutes {
      *                 message:
      *                   type: string
      *               example:
-     *                 message: Car with id=${id} not found
+     *                 message: Car not found
      */
     this.router.patch('/:id', authenticateToken, this.controller.update);
 
@@ -283,7 +284,7 @@ class CarRoutes {
      *                 message:
      *                   type: string
      *               example:
-     *                 message: Car with id=${id} deleted
+     *                 message: Car deleted
      *       400:
      *         description: Bad request
      *         content:
@@ -306,7 +307,7 @@ class CarRoutes {
      *                 message:
      *                   type: string
      *               example:
-     *                 message: Car with id=${id} not found
+     *                 message: Car not found
      */
     this.router.delete('/:id', authenticateToken, this.controller.delete);
   }

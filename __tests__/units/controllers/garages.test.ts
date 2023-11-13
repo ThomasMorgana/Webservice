@@ -272,7 +272,7 @@ describe('GarageController', () => {
 
       expect(garageService.delete).toHaveBeenCalledWith(1);
       expect(mockResponse.status).toHaveBeenCalledWith(StatusCodes.OK);
-      expect(mockResponse.send).toHaveBeenCalledWith({ message: 'Garage with id=1 deleted' });
+      expect(mockResponse.send).toHaveBeenCalledWith({ message: 'Garage deleted' });
     });
 
     it('should handle not found garage during delete by ID', async () => {

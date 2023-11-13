@@ -171,7 +171,7 @@ class GarageRoutes {
      *                 message:
      *                   type: string
      *               example:
-     *                 message: Garage with id=${id} not found
+     *                 message: Garage not found
      */
     this.router.get('/:id', this.controller.findOne);
 
@@ -210,7 +210,7 @@ class GarageRoutes {
      *                 message:
      *                   type: string
      *               example:
-     *                 message: Garage with id=${id} updated
+     *                 message: Garage updated
      *       400:
      *         description: Bad request
      *         content:
@@ -233,7 +233,7 @@ class GarageRoutes {
      *                 message:
      *                   type: string
      *               example:
-     *                 message: Garage with id=${id} not found
+     *                 message: Garage not found
      */
     this.router.patch('/:id', authenticateToken, this.controller.update);
 
@@ -265,7 +265,7 @@ class GarageRoutes {
      *                 message:
      *                   type: string
      *               example:
-     *                 message: Garage with id=${id} deleted
+     *                 message: Garage deleted
      *       400:
      *         description: Bad request
      *         content:

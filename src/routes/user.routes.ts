@@ -268,7 +268,7 @@ class UserRoutes {
      *                 message:
      *                   type: string
      *               example:
-     *                 message: User with id=${id} deleted
+     *                 message: User deleted
      *       404:
      *         description: User not found
      *         content:

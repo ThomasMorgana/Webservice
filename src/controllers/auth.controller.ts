@@ -4,7 +4,6 @@ import bcryptjs from 'bcryptjs';
 import { RefreshToken } from '@prisma/client';
 import { generateAccessToken, generateRefreshToken } from '../utils/jwt';
 import jwt from 'jsonwebtoken';
-import resetTokenService from '../services/reset-token.service';
 import { errorHandler } from '../utils/error_handler';
 import { StatusCodes } from 'http-status-codes';
 import { logger } from '../utils/logger';
@@ -17,12 +16,12 @@ export default class AuthController {
   private resetTokenService: ResetTokenService;
   private mailService: MailService = new MailService();
 
-  constructor(userService: UserService, resetTokenService: resetTokenService) {
+  constructor(userService: UserService, resetTokenService: ResetTokenService) {
     this.userService = userService;
     this.resetTokenService = resetTokenService;
   }
 
-  async login(req: Request, res: Response) {
+  login = async (req: Request, res: Response) => {
     if (!req.body.password || !req.body.email) {
       return res.status(StatusCodes.BAD_REQUEST).send('Password and email must be present and not empty');
     }
@@ -40,9 +39,9 @@ export default class AuthController {
     } catch (error) {
       errorHandler(res, error);
     }
-  }
+  };
 
-  async register(req: Request, res: Response) {
+  register = async (req: Request, res: Response) => {
     if (!req.body.password || !req.body.email) {
       return res.status(StatusCodes.BAD_REQUEST).send('Password and email must be present and not empty');
     }
@@ -62,9 +61,9 @@ export default class AuthController {
     } catch (error) {
       errorHandler(res, error);
     }
-  }
+  };
 
-  async generateRefreshToken(req: Request, res: Response) {
+  generateRefreshToken = async (req: Request, res: Response) => {
     const refreshToken: string = req.body.refreshToken;
 
     if (!refreshToken) {
@@ -86,9 +85,9 @@ export default class AuthController {
     } catch (error) {
       errorHandler(res, error);
     }
-  }
+  };
 
-  async generateResetToken(req: Request, res: Response) {
+  generateResetToken = async (req: Request, res: Response) => {
     const userEmail = req.body.email;
 
     if (!userEmail) {
@@ -103,7 +102,7 @@ export default class AuthController {
       const resetToken = await this.resetTokenService.generate(user.id);
       await this.mailService.onPasswordReset(user, resetToken.hashedToken);
     } catch (error) {
-      // We don't want to let the user know that the account does not exists
+      // We don't want to let the user know that the account does not exist
       if (error instanceof EntityNotFoundError) {
         logger.error(error);
       } else {
@@ -114,9 +113,9 @@ export default class AuthController {
     res
       .status(StatusCodes.OK)
       .send('If the email matches one of our accounts, an email has been sent with the reset token');
-  }
+  };
 
-  async resetPassword(req: Request, res: Response) {
+  resetPassword = async (req: Request, res: Response) => {
     const { token, password } = req.body;
 
     if (!token || !password) {
@@ -130,5 +129,5 @@ export default class AuthController {
     } catch (error) {
       errorHandler(res, error);
     }
-  }
+  };
 }
