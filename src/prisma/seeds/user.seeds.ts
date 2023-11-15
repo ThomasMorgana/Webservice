@@ -17,6 +17,15 @@ export const seedUsers = async (prisma: PrismaClient) => {
     },
   });
 
+  await prisma.user.create({
+    data: {
+      email: 'user@mail.com',
+      role: Role.USER,
+      active: true,
+      password: await bcryptjs.hash('password', 12),
+    },
+  });
+
   const amountOfUsers = 10;
 
   for (let i = 0; i < amountOfUsers; i++) {
