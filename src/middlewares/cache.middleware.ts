@@ -27,13 +27,11 @@ export const enableCache = async (req: Request, res: Response, next: NextFunctio
     logger.error(`Redis Client Error: \n ${err}`);
   });
 
-  logger.info(process.env.REDIS_URL);
+  await client.connect();
 
   const key = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
 
   try {
-    await client.connect();
-
     const [cachedResponse, keyTTL, keyCreationTime] = await Promise.all([
       client.get(key),
       client.ttl(key),
