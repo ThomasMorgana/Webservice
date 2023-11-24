@@ -2,6 +2,7 @@ import { Router } from 'express';
 import CarController from '../controllers/car.controller';
 import { authenticateToken } from '../middlewares/auth.middleware';
 import CarService from '../services/car.service';
+import { enableCache } from '../middlewares/cache.middleware';
 
 /**
  * @swagger
@@ -143,7 +144,7 @@ class CarRoutes {
      *             schema:
      *               $ref: '#/components/schemas/Cars'
      */
-    this.router.get('/', this.controller.findAll);
+    this.router.get('/', enableCache, this.controller.findAll);
 
     /**
      * @swagger
