@@ -17,6 +17,7 @@ export default class Server {
     app.use('/api/subscription/stripe-hook', express.raw({ type: '*/*' }));
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
+    app.enable('trust proxy');
   }
 
   private configureSwagger(app: Application): void {
