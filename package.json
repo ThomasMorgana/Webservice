@@ -17,7 +17,7 @@
         "prepare":"node -e \"try { require('husky').install() } catch (e) {if (e.code !== 'MODULE_NOT_FOUND') throw e}\"",
         "docker:dev": "npm install && npx prisma generate && npx prisma migrate deploy && npm run seed && npm run test && npm start",
         "docker:prod": "npm install --production && npm run start",
-        "deploy:gcp": "npm install && npm run build && npm run start:prod"
+        "deploy:gcp": "npm install && npm run build && npx prisma generate && npx prisma migrate deploy && npm run seed && npm run start:prod"
     },
     "keywords": [
         "nodejs",
