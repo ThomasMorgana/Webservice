@@ -1,56 +1,58 @@
 # Webservice
 
-Ce projet contient les corrections live-code des TP/TD cours de WebService d'Ynov
+This project contains a simple Express API, allowing for the creation of an account and manipulation of garages and cars.
 
 ## Environment Variables
 
-Pour faire fonctionner ce projet, vous devrez ajouter les variables d'environment suivante dans un fichier `.env` à la racine du projet.
-
-`DATABASE_URL`
-
-`JWT_ACCESS_SECRET`
-
-`JWT_REFRESH_SECRET`
-
-Vous pouvez trouver un exemple dans le fichier .env.example du projet.
+To make this project work, you will need to add environment variables in a .env file at the root of the project. You will find an example in the source files containing the references to be specified.
 
 ## API Reference
 
-Les références de l'API sont inclues dans un fichier json contenant une collection postman.
+A Swagger document describing the various routes is accessible at the endpoint /api-docs after launching the project.
 
-## Installation et lancement local
+## Installation and local
 
-Instalation des dépendances avec npm
+The project is encapsulated in a docker-compose, allowing you to start both the API and the associated databases and monitoring tool.
+
+You can launch the entire project with the command docker compose up.
+
+If you only want to launch the API, here are the main NPM commands:
+
+Install dependencies with npm:
 
 ```bash
   npm install
 ```
 
-Lancement du seeding BDD avec
+Launch BDD seeding with:
 
 ```bash
   npm run seed
 ```
 
-Lancement du serveur
+Start the server:
 
 ```bash
   npm run start
 ```
 
-Build du projet
+Build the project:
 
 ```bash
   npm run build
 ```
 
-Build et lancement du projet
+Build and launch the project:
 
 ```bash
   npm run dev
 ```
 
-## Dependencies
+## Deployment
+
+This project is deployed on GCP. The CI/CD is configured with hooks on the GCP side. They will build, upload and deploy a new version after each a tag containing the keyword "release".
+
+## Project Dependencies
 
 - [@prisma/client](https://ghub.io/@prisma/client): Prisma Client is an auto-generated, type-safe and modern JavaScript/TypeScript ORM for Node.js that&#39;s tailored to your data. Supports PostgreSQL, CockroachDB, MySQL, MariaDB, SQL Server, SQLite &amp; MongoDB databases.
 - [@types/bcryptjs](https://ghub.io/@types/bcryptjs): TypeScript definitions for bcryptjs

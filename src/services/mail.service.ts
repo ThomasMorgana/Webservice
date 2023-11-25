@@ -11,7 +11,6 @@ export default class MailService {
     try {
       await this.client.sendMail(user, subject, content);
     } catch (error) {
-      console.log(error);
       throw new InternalServerError(error, 'Brevo error');
     }
   }

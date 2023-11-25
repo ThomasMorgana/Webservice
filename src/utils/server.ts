@@ -1,9 +1,8 @@
 import express, { Application } from 'express';
-import { rateLimit } from 'express-rate-limit';
 import { logRequest } from './logger';
 import Routes from '../routes';
 import swaggerUi from 'swagger-ui-express';
-import { LimiterConfig, swaggerSpec } from '../config';
+import { swaggerSpec } from '../config';
 
 export default class Server {
   constructor(app: Application) {
@@ -21,10 +20,14 @@ export default class Server {
 
   private configureSwagger(app: Application): void {
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+    app.get('/', (_req, res) => {
+      res.redirect('/api-docs');
+    });
   }
 
   private setupMiddleware(app: Application): void {
-    app.use(rateLimit(LimiterConfig));
+    // DISABLED FOR GCP DEPLOYEMNT
+    //app.use(rateLimit(LimiterConfig));
     app.use(logRequest);
   }
 

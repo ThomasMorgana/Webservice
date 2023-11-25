@@ -4,7 +4,7 @@ services:
   webservice:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-dev
       target: dev
     image: node:18-alpine
     restart: always
