@@ -1,6 +1,6 @@
 import pino from 'pino';
-import expressPino from 'express-pino-logger';
+import pinoHttp from 'pino-http';
 import { logRequestConfig, loggerConfig } from '../config';
 
 export const logger = pino(loggerConfig);
-export const logRequest = expressPino(logRequestConfig);
+export const logRequest = pinoHttp(logRequestConfig);
