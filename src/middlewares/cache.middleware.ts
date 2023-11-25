@@ -20,7 +20,10 @@ const setCacheHeaders = (res: Response, keyTTL: number, keyCreationTime?: string
 
 export const enableCache = async (req: Request, res: Response, next: NextFunction) => {
   const client = createClient({
-    url: process.env.REDIS_URL as string,
+    socket: {
+      host: process.env.REDIS_HOST || 'localhost',
+      port: Number(process.env.REDIS_PORT || 6379),
+    },
   });
 
   client.on('error', (err) => {
@@ -52,14 +55,12 @@ export const enableCache = async (req: Request, res: Response, next: NextFunctio
           ]);
         }
         originalSend.call(this, body);
+        client.quit();
       };
-
       next();
     }
   } catch (error) {
     logger.error('Error accessing Redis', error);
     next();
-  } finally {
-    client.quit();
   }
 };
