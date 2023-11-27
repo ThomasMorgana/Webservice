@@ -6,4 +6,4 @@ const app: Application = express();
 
 const contextService = ContextService.from();
 
-Server.createServer(app, contextService).start();
+Server.from(app, contextService).start();

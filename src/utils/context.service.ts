@@ -2,7 +2,7 @@ import pino from 'pino';
 import Logger = pino.Logger;
 
 export class ContextService {
-  static readonly DEFAULT_SERVER_PORT: number = 8082;
+  private static readonly DEFAULT_SERVER_PORT = 8082;
 
   constructor(
     readonly logger: Logger,

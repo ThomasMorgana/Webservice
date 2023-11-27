@@ -21,30 +21,30 @@ export default class Server {
       .on('error', (error) => logger.error(error));
   }
 
-  static createServer(app: Application, contextService: ContextService): Server {
-    contextService.logger.info('express started');
+  static from(app: Application, { port, logger }: ContextService): Server {
+    logger.info('express started');
     app.use('/api/subscription/stripe-hook', express.raw({ type: '*/*' }));
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
-    contextService.logger.info('express initialized');
+    logger.info('express initialized');
 
-    contextService.logger.info('swagger initializing');
+    logger.info('swagger initializing');
     app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
     app.get('/', (_req, res) => {
       res.redirect('/api-docs');
     });
-    contextService.logger.info('swagger initialized');
+    logger.info('swagger initialized');
 
-    contextService.logger.info('middleware initializing');
+    logger.info('middleware initializing');
     // DISABLED FOR GCP DEPLOYEMNT
     //app.use(rateLimit(LimiterConfig));
     app.use(logRequest);
-    contextService.logger.info('middleware initialized');
+    logger.info('middleware initialized');
 
-    contextService.logger.info('routes initializing');
+    logger.info('routes initializing');
     new Routes(app);
-    contextService.logger.info('routes initialized');
+    logger.info('routes initialized');
 
-    return new Server(app, contextService);
+    return new Server(app, { logger, port });
   }
 }
