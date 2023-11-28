@@ -10,6 +10,7 @@ import { logger } from '../utils/logger';
 import { EntityNotFoundError } from '../errors/base.error';
 import ResetTokenService from '../services/reset-token.service';
 import MailService from '../services/mail.service';
+import { AuthSchema } from '../utils/validator_schemas';
 
 export default class AuthController {
   private userService: UserService;
@@ -22,10 +23,8 @@ export default class AuthController {
   }
 
   login = async (req: Request, res: Response) => {
-    if (!req.body.password || !req.body.email) {
-      return res.status(StatusCodes.BAD_REQUEST).send('Password and email must be present and not empty');
-    }
     try {
+      AuthSchema.parse(req.body);
       const user = await this.userService.login({ email: req.body.email, password: req.body.password });
 
       if (!user) {
@@ -42,10 +41,8 @@ export default class AuthController {
   };
 
   register = async (req: Request, res: Response) => {
-    if (!req.body.password || !req.body.email) {
-      return res.status(StatusCodes.BAD_REQUEST).send('Password and email must be present and not empty');
-    }
     try {
+      AuthSchema.parse(req.body);
       const hashedPassword = await bcryptjs.hash(req.body.password, 12);
       const { user, activationToken } = await this.userService.register({
         email: req.body.email,

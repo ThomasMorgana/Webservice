@@ -4,6 +4,7 @@ import Pagination from '../interfaces/pagination.interface';
 import { errorHandler } from '../utils/error_handler';
 import { StatusCodes } from 'http-status-codes';
 import SubscriptionService from '../services/subscription.service';
+import { SubscriptionSchema } from '../utils/validator_schemas';
 
 export default class SubscriptionController {
   private subscriptionService: SubscriptionService;
@@ -19,15 +20,9 @@ export default class SubscriptionController {
       });
     }
 
-    const { userId } = req.body;
-
-    if (!userId) {
-      return res.status(StatusCodes.BAD_REQUEST).send({
-        message: 'You must send the userId!',
-      });
-    }
-
     try {
+      SubscriptionSchema.parse(req.body);
+      const { userId } = req.body;
       const savedSubscription = await this.subscriptionService.save(userId);
 
       res.status(StatusCodes.CREATED).send(savedSubscription);
@@ -70,10 +65,10 @@ export default class SubscriptionController {
   };
 
   update = async (req: Request, res: Response) => {
-    const subscriptionToUpdate: Subscription = req.body;
-    subscriptionToUpdate.id = req.params.id;
-
     try {
+      SubscriptionSchema.parse(req.body);
+      const subscriptionToUpdate: Subscription = req.body;
+      subscriptionToUpdate.id = req.params.id;
       const subscription = await this.subscriptionService.update(subscriptionToUpdate);
       res.status(StatusCodes.OK).send(subscription);
     } catch (error) {

@@ -4,6 +4,7 @@ import Pagination from '../interfaces/pagination.interface';
 import { errorHandler } from '../utils/error_handler';
 import { StatusCodes } from 'http-status-codes';
 import UserService from '../services/user.service';
+import { UserSchema } from '../utils/validator_schemas';
 
 export default class UserController {
   private userService: UserService;
@@ -12,13 +13,13 @@ export default class UserController {
     this.userService = service;
   }
   async create(req: Request, res: Response) {
+    if (!req.body) {
+      return res.status(StatusCodes.BAD_REQUEST).send({
+        message: 'Content cannot be empty!',
+      });
+    }
     try {
-      if (!req.body) {
-        return res.status(StatusCodes.BAD_REQUEST).send({
-          message: 'Content cannot be empty!',
-        });
-      }
-
+      UserSchema.parse(req.body);
       const savedUser = await this.userService.register(req.body);
 
       res.status(StatusCodes.CREATED).send(savedUser);
@@ -31,14 +32,13 @@ export default class UserController {
 
   async createAdmin(req: Request, res: Response) {
     try {
-      if (!req.body || !req.role) {
+      if (!req.body) {
         return res.status(StatusCodes.BAD_REQUEST).send({
           message: 'Content cannot be empty!',
         });
       }
 
-      const user: User = req.body;
-      const currentUserRole: Role = req.role;
+      const currentUserRole = req.role;
 
       if (currentUserRole !== Role.ADMIN) {
         return res.status(StatusCodes.FORBIDDEN).send({
@@ -46,6 +46,8 @@ export default class UserController {
         });
       }
 
+      UserSchema.parse(req.body);
+      const user: User = req.body;
       user.role = Role.ADMIN;
       const savedUser = await this.userService.register(user);
 
@@ -95,10 +97,10 @@ export default class UserController {
   }
 
   async update(req: Request, res: Response) {
-    const userToUpdate: User = req.body;
-    userToUpdate.id = req.params.id;
-
     try {
+      UserSchema.parse(req.body);
+      const userToUpdate: User = req.body;
+      userToUpdate.id = req.params.id;
       const user = await this.userService.update(userToUpdate);
       res.status(StatusCodes.OK).send(user);
     } catch (error) {

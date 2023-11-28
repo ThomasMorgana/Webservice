@@ -4,6 +4,7 @@ import Pagination from '../interfaces/pagination.interface';
 import { errorHandler } from '../utils/error_handler';
 import { StatusCodes } from 'http-status-codes';
 import { GarageService } from '../services/garage.service';
+import { GarageDTOSchema } from '../utils/validator_schemas';
 
 export default class GarageController {
   private garageService: GarageService;
@@ -18,14 +19,10 @@ export default class GarageController {
         message: 'Content can not be empty!',
       });
 
-    if (!req.token || !req.token.id)
-      return res.status(StatusCodes.UNAUTHORIZED).send({
-        message: 'Authentication error : token not readable',
-      });
-
     try {
+      GarageDTOSchema.parse(req.body);
       const garage: Garage = req.body;
-      garage.userId = req.token.id;
+      garage.userId = req.token?.id;
       const savedGarage = await this.garageService.save(garage);
 
       res.status(StatusCodes.CREATED).send(savedGarage);
@@ -55,10 +52,10 @@ export default class GarageController {
   };
 
   update = async (req: Request, res: Response) => {
-    const garageToUpdate: Garage = req.body;
-    garageToUpdate.id = parseInt(req.params.id);
-
     try {
+      GarageDTOSchema.parse(req.body);
+      const garageToUpdate: Garage = req.body;
+      garageToUpdate.id = parseInt(req.params.id);
       const garage = await this.garageService.update(garageToUpdate);
       res.status(StatusCodes.OK).send(garage);
     } catch (error) {
