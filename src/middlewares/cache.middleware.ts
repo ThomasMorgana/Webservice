@@ -55,7 +55,6 @@ export const enableCache = async (req: Request, res: Response, next: NextFunctio
           ]);
         }
         originalSend.call(this, body);
-        client.quit();
       };
       next();
     }

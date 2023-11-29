@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import CarService from '../services/car.service';
-import { Car } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import { errorHandler } from '../utils/error_handler';
 import { StatusCodes } from 'http-status-codes';
+import { CarDTO, CarSchema, CarUptadeDTO } from '../utils/validator_schemas';
 
 export default class CarController {
   private carService: CarService = new CarService();
@@ -18,16 +18,9 @@ export default class CarController {
         message: 'Content can not be empty!',
       });
 
-    if (!req.token)
-      return res.status(StatusCodes.UNAUTHORIZED).send({
-        message: 'Authentication error : token not readable',
-      });
-
-    const car: Car = req.body;
-    car.userId = req.token.id;
-
     try {
-      const savedCar = await this.carService.save(car);
+      const car: CarDTO = CarSchema.parse(req.body);
+      const savedCar = await this.carService.save(req.token?.id, car);
       res.status(StatusCodes.CREATED).send(savedCar);
     } catch (error) {
       errorHandler(res, error);
@@ -62,12 +55,9 @@ export default class CarController {
   update = async (req: Request, res: Response) => {
     if (!req.body) return res.status(StatusCodes.BAD_REQUEST).send({ message: `You must provide a body` });
 
-    const carToUpdate: Car = req.body;
-
     try {
-      carToUpdate.id = parseInt(req.params.id);
-
-      const car = await this.carService.update(carToUpdate);
+      const carToUpdate: CarUptadeDTO = CarSchema.parse(req.body);
+      const car = await this.carService.update(parseInt(req.params.id), carToUpdate);
       res.status(StatusCodes.OK).send(car);
     } catch (error) {
       errorHandler(res, error);

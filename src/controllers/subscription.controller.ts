@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { Subscription } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import { errorHandler } from '../utils/error_handler';
 import { StatusCodes } from 'http-status-codes';
 import SubscriptionService from '../services/subscription.service';
+import { SubscriptionSchema } from '../utils/validator_schemas';
 
 export default class SubscriptionController {
   private subscriptionService: SubscriptionService;
@@ -19,15 +19,8 @@ export default class SubscriptionController {
       });
     }
 
-    const { userId } = req.body;
-
-    if (!userId) {
-      return res.status(StatusCodes.BAD_REQUEST).send({
-        message: 'You must send the userId!',
-      });
-    }
-
     try {
+      const { userId } = SubscriptionSchema.parse(req.body);
       const savedSubscription = await this.subscriptionService.save(userId);
 
       res.status(StatusCodes.CREATED).send(savedSubscription);
@@ -64,18 +57,6 @@ export default class SubscriptionController {
     try {
       this.subscriptionService.handleWebhook(req.body, (req.headers['stripe-signature'] as string) || '');
       return res.sendStatus(StatusCodes.OK);
-    } catch (error) {
-      errorHandler(res, error);
-    }
-  };
-
-  update = async (req: Request, res: Response) => {
-    const subscriptionToUpdate: Subscription = req.body;
-    subscriptionToUpdate.id = req.params.id;
-
-    try {
-      const subscription = await this.subscriptionService.update(subscriptionToUpdate);
-      res.status(StatusCodes.OK).send(subscription);
     } catch (error) {
       errorHandler(res, error);
     }

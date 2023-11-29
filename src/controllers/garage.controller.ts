@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { Garage } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import { errorHandler } from '../utils/error_handler';
 import { StatusCodes } from 'http-status-codes';
 import { GarageService } from '../services/garage.service';
+import { GarageDTO, GarageSchema, GarageUpdateDTO } from '../utils/validator_schemas';
 
 export default class GarageController {
   private garageService: GarageService;
@@ -18,15 +18,9 @@ export default class GarageController {
         message: 'Content can not be empty!',
       });
 
-    if (!req.token || !req.token.id)
-      return res.status(StatusCodes.UNAUTHORIZED).send({
-        message: 'Authentication error : token not readable',
-      });
-
     try {
-      const garage: Garage = req.body;
-      garage.userId = req.token.id;
-      const savedGarage = await this.garageService.save(garage);
+      const garage: GarageDTO = GarageSchema.parse(req.body);
+      const savedGarage = await this.garageService.save(req.token?.id, garage);
 
       res.status(StatusCodes.CREATED).send(savedGarage);
     } catch (error) {
@@ -55,11 +49,9 @@ export default class GarageController {
   };
 
   update = async (req: Request, res: Response) => {
-    const garageToUpdate: Garage = req.body;
-    garageToUpdate.id = parseInt(req.params.id);
-
     try {
-      const garage = await this.garageService.update(garageToUpdate);
+      const garageToUpdate: GarageUpdateDTO = GarageSchema.parse(req.body);
+      const garage = await this.garageService.update(parseInt(req.params.id), garageToUpdate);
       res.status(StatusCodes.OK).send(garage);
     } catch (error) {
       errorHandler(res, error);

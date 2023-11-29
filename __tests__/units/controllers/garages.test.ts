@@ -51,22 +51,9 @@ describe('GarageController', () => {
       } as unknown as Request;
 
       await garageController.create(mockRequest, mockResponse);
-      expect(garageService.save).toHaveBeenCalledWith(mockRequest.body);
+      expect(garageService.save).toHaveBeenCalledWith(mockRequest.token?.id, mockRequest.body);
       expect(mockResponse.status).toHaveBeenCalledWith(StatusCodes.CREATED);
       expect(mockResponse.send).toHaveBeenCalledWith(mockedGarage);
-    });
-
-    it('should send a Auth Error when called without token', async () => {
-      const mockRequest = {
-        body: {
-          name: 'Test Garage',
-          spaces: 5,
-        },
-      } as unknown as Request;
-
-      await garageController.create(mockRequest, mockResponse);
-      expect(mockResponse.status).toHaveBeenCalledWith(StatusCodes.UNAUTHORIZED);
-      expect(mockResponse.send).toHaveBeenCalled();
     });
 
     it('should send a Bad Request error when body is null', async () => {
@@ -97,7 +84,7 @@ describe('GarageController', () => {
 
       await garageController.create(mockRequest, mockResponse);
 
-      expect(garageService.save).toHaveBeenCalledWith(mockRequest.body);
+      expect(garageService.save).toHaveBeenCalledWith(mockRequest.token?.id, mockRequest.body);
       expect(mockResponse.status).toHaveBeenCalledWith(StatusCodes.INTERNAL_SERVER_ERROR);
       expect(mockResponse.send).toHaveBeenCalled();
     });
@@ -151,7 +138,7 @@ describe('GarageController', () => {
 
       await garageController.findOne(mockRequest, mockResponse);
 
-      expect(garageService.retrieveById).toHaveBeenCalledWith(1);
+      expect(garageService.retrieveById).toHaveBeenCalledWith(parseInt(mockRequest.params.id));
       expect(mockResponse.status).toHaveBeenCalledWith(StatusCodes.OK);
       expect(mockResponse.send).toHaveBeenCalledWith(mockGarage);
       expect.assertions(3);
@@ -168,7 +155,7 @@ describe('GarageController', () => {
 
       await garageController.findOne(mockRequest, mockResponse);
 
-      expect(garageService.retrieveById).toHaveBeenCalledWith(1);
+      expect(garageService.retrieveById).toHaveBeenCalledWith(parseInt(mockRequest.params.id));
       expect(mockResponse.status).toHaveBeenCalledWith(StatusCodes.NOT_FOUND);
       expect(mockResponse.send).toHaveBeenCalledWith({ message: 'Garage with id=1 not found' });
       expect.assertions(3);
@@ -186,7 +173,7 @@ describe('GarageController', () => {
       try {
         await garageController.findOne(mockRequest, mockResponse);
       } catch (error) {}
-      expect(garageService.retrieveById).toHaveBeenCalledWith(1);
+      expect(garageService.retrieveById).toHaveBeenCalledWith(parseInt(mockRequest.params.id));
       expect(mockResponse.status).toHaveBeenCalledWith(StatusCodes.INTERNAL_SERVER_ERROR);
       expect(mockResponse.send).toHaveBeenCalled();
       expect.assertions(3);
@@ -212,7 +199,7 @@ describe('GarageController', () => {
 
       await garageController.update(mockRequest, mockResponse);
 
-      expect(garageService.update).toHaveBeenCalledWith(mockRequest.body);
+      expect(garageService.update).toHaveBeenCalledWith(parseInt(mockRequest.params.id), mockRequest.body);
 
       expect(mockResponse.status).toHaveBeenCalledWith(StatusCodes.OK);
       expect(mockResponse.send).toHaveBeenCalledWith({
@@ -236,7 +223,7 @@ describe('GarageController', () => {
 
       await garageController.update(mockRequest, mockResponse);
 
-      expect(garageService.update).toHaveBeenCalledWith({ id: 1, ...mockRequest.body });
+      expect(garageService.update).toHaveBeenCalledWith(parseInt(mockRequest.params.id), mockRequest.body);
       expect(mockResponse.status).toHaveBeenCalledWith(StatusCodes.NOT_FOUND);
       expect(mockResponse.send).toHaveBeenCalledWith({ message: 'Garage with id=1 not found' });
     });
@@ -256,7 +243,7 @@ describe('GarageController', () => {
 
       await garageController.update(mockRequest, mockResponse);
 
-      expect(garageService.update).toHaveBeenCalledWith({ id: 1, ...mockRequest.body });
+      expect(garageService.update).toHaveBeenCalledWith(parseInt(mockRequest.params.id), mockRequest.body);
       expect(mockResponse.status).toHaveBeenCalledWith(StatusCodes.INTERNAL_SERVER_ERROR);
       expect(mockResponse.send).toHaveBeenCalled();
     });
@@ -270,7 +257,7 @@ describe('GarageController', () => {
 
       await garageController.delete(mockRequest, mockResponse);
 
-      expect(garageService.delete).toHaveBeenCalledWith(1);
+      expect(garageService.delete).toHaveBeenCalledWith(parseInt(mockRequest.params.id));
       expect(mockResponse.status).toHaveBeenCalledWith(StatusCodes.OK);
       expect(mockResponse.send).toHaveBeenCalledWith({ message: 'Garage deleted' });
     });
@@ -285,7 +272,7 @@ describe('GarageController', () => {
 
       await garageController.delete(mockRequest, mockResponse);
 
-      expect(garageService.delete).toHaveBeenCalledWith(1);
+      expect(garageService.delete).toHaveBeenCalledWith(parseInt(mockRequest.params.id));
       expect(mockResponse.status).toHaveBeenCalledWith(StatusCodes.NOT_FOUND);
       expect(mockResponse.send).toHaveBeenCalledWith({ message: 'Garage with id=1 not found' });
     });
@@ -301,7 +288,7 @@ describe('GarageController', () => {
 
       await garageController.delete(mockRequest, mockResponse);
 
-      expect(garageService.delete).toHaveBeenCalledWith(1);
+      expect(garageService.delete).toHaveBeenCalledWith(parseInt(mockRequest.params.id));
       expect(mockResponse.status).toHaveBeenCalledWith(StatusCodes.INTERNAL_SERVER_ERROR);
       expect(mockResponse.send).toHaveBeenCalled();
     });
