@@ -1,14 +1,15 @@
 import { PrismaClient, Garage, Prisma } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import { EntityNotFoundError, InternalServerError } from '../errors/base.error';
+import { GarageDTO, GarageUpdateDTO } from '../utils/validator_schemas';
 
 export class GarageService {
   private repository: PrismaClient = new PrismaClient();
 
-  async save(garage: Garage): Promise<Garage> {
+  async save(userId: string, garage: GarageDTO): Promise<Garage> {
     try {
       return this.repository.garage.create({
-        data: { ...garage },
+        data: { ...garage, userId },
       });
     } catch (error) {
       throw new InternalServerError(error);
@@ -43,15 +44,15 @@ export class GarageService {
     }
   }
 
-  async update(garage: Garage): Promise<Garage> {
+  async update(id: number, garage: GarageUpdateDTO): Promise<Garage> {
     try {
       return this.repository.garage.update({
-        where: { id: garage.id },
+        where: { id },
         data: { ...garage },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        throw new EntityNotFoundError('Garage', garage.id.toString());
+        throw new EntityNotFoundError('Garage', id.toString());
       } else {
         throw new InternalServerError(error);
       }

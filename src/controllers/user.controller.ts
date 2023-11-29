@@ -4,7 +4,7 @@ import Pagination from '../interfaces/pagination.interface';
 import { errorHandler } from '../utils/error_handler';
 import { StatusCodes } from 'http-status-codes';
 import UserService from '../services/user.service';
-import { UserSchema } from '../utils/validator_schemas';
+import { UserSchema, UserUpdateDTO } from '../utils/validator_schemas';
 
 export default class UserController {
   private userService: UserService;
@@ -98,10 +98,8 @@ export default class UserController {
 
   async update(req: Request, res: Response) {
     try {
-      UserSchema.parse(req.body);
-      const userToUpdate: User = req.body;
-      userToUpdate.id = req.params.id;
-      const user = await this.userService.update(userToUpdate);
+      const userToUpdate: UserUpdateDTO = UserSchema.parse(req.body);
+      const user = await this.userService.update(req.params.id, userToUpdate);
       res.status(StatusCodes.OK).send(user);
     } catch (error) {
       errorHandler(res, error);

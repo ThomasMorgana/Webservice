@@ -11,11 +11,12 @@ import {
 } from '../errors/auth.error';
 import { generateActivationToken } from '../utils/jwt';
 import { EntityNotFoundError, InternalServerError } from '../errors/base.error';
+import { AuthDTO, UserUpdateDTO } from '../utils/validator_schemas';
 
 export default class UserService {
   private repository: PrismaClient = new PrismaClient();
 
-  async login(credentials: Prisma.UserCreateInput): Promise<User | null> {
+  async login(credentials: AuthDTO): Promise<User | null> {
     const user = await this.repository.user.findUnique({
       where: {
         email: credentials.email,
@@ -34,8 +35,7 @@ export default class UserService {
     return user;
   }
 
-  async register(credentials: Prisma.UserCreateInput): Promise<{ user: User; activationToken: string }> {
-    let user = null;
+  async register(credentials: AuthDTO): Promise<{ user: User; activationToken: string }> {
     try {
       const existingUser = await this.repository.user.findUnique({
         where: {
@@ -47,7 +47,7 @@ export default class UserService {
         throw new MailAlreadyUsedError();
       }
 
-      user = await this.repository.user.create({
+      const user = await this.repository.user.create({
         data: {
           ...credentials,
         },
@@ -57,7 +57,6 @@ export default class UserService {
 
       return { user, activationToken };
     } catch (error) {
-      if (user) this.delete(user.id);
       if (error instanceof MailAlreadyUsedError) throw error;
       throw new InternalServerError(error);
     }
@@ -73,7 +72,7 @@ export default class UserService {
     user.active = true;
 
     try {
-      return await this.update(user);
+      return await this.update(user.id, user);
     } catch (error) {
       throw new InternalServerError(error);
     }
@@ -108,15 +107,15 @@ export default class UserService {
     }
   }
 
-  async update(user: User): Promise<User> {
+  async update(id: string, user: UserUpdateDTO): Promise<User> {
     try {
       return await this.repository.user.update({
-        where: { id: user.id },
+        where: { id },
         data: { ...user },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        throw new EntityNotFoundError('User', user.id);
+        throw new EntityNotFoundError('User', id);
       } else {
         throw new InternalServerError(error);
       }

@@ -1,18 +1,21 @@
 import { PrismaClient, Car, Prisma } from '@prisma/client';
 import Pagination from '../interfaces/pagination.interface';
 import { EntityNotFoundError, InternalServerError } from '../errors/base.error';
+import { CarDTO, CarUptadeDTO } from '../utils/validator_schemas';
 
 export default class CarService {
   private repository: PrismaClient = new PrismaClient();
 
-  async save(car: Car): Promise<Car> {
+  async save(userId: string, car: CarDTO): Promise<Car> {
     try {
+      const garageConnection = car.garageId ? { connect: { id: car.garageId } } : undefined;
       return this.repository.car.create({
         data: {
           model: car.model,
           brand: car.brand,
           year: car.year,
-          user: { connect: { id: car.userId } },
+          garage: garageConnection,
+          user: { connect: { id: userId } },
         },
       });
     } catch (error) {
@@ -46,15 +49,15 @@ export default class CarService {
     }
   }
 
-  async update(car: Car): Promise<Car> {
+  async update(id: number, car: CarUptadeDTO): Promise<Car> {
     try {
       return this.repository.car.update({
-        where: { id: car.id },
+        where: { id },
         data: { ...car },
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        throw new EntityNotFoundError('Car', car.id.toString());
+        throw new EntityNotFoundError('Car', id.toString());
       } else {
         throw new InternalServerError(error);
       }

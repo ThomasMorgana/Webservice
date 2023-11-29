@@ -10,7 +10,7 @@ import { logger } from '../utils/logger';
 import { EntityNotFoundError } from '../errors/base.error';
 import ResetTokenService from '../services/reset-token.service';
 import MailService from '../services/mail.service';
-import { AuthSchema } from '../utils/validator_schemas';
+import { AuthDTO, AuthSchema } from '../utils/validator_schemas';
 
 export default class AuthController {
   private userService: UserService;
@@ -24,8 +24,7 @@ export default class AuthController {
 
   login = async (req: Request, res: Response) => {
     try {
-      AuthSchema.parse(req.body);
-      const user = await this.userService.login({ email: req.body.email, password: req.body.password });
+      const user = await this.userService.login(AuthSchema.parse(req.body));
 
       if (!user) {
         return res.status(StatusCodes.NOT_FOUND).send("Those credentials don't match any users");
@@ -42,12 +41,9 @@ export default class AuthController {
 
   register = async (req: Request, res: Response) => {
     try {
-      AuthSchema.parse(req.body);
-      const hashedPassword = await bcryptjs.hash(req.body.password, 12);
-      const { user, activationToken } = await this.userService.register({
-        email: req.body.email,
-        password: hashedPassword,
-      });
+      const userDTO: AuthDTO = AuthSchema.parse(req.body);
+      userDTO.password = await bcryptjs.hash(req.body.password, 12);
+      const { user, activationToken } = await this.userService.register(userDTO);
 
       await this.mailService.onRegister(user, activationToken);
 
@@ -121,7 +117,10 @@ export default class AuthController {
 
     try {
       const user = await this.resetTokenService.getUserFromToken(token);
-      const updatedUser = await this.userService.update({ ...user, password: await bcryptjs.hash(password, 12) });
+      const updatedUser = await this.userService.update(user.id, {
+        ...user,
+        password: await bcryptjs.hash(password, 12),
+      });
       res.status(StatusCodes.OK).send(updatedUser);
     } catch (error) {
       errorHandler(res, error);
