@@ -50,7 +50,7 @@ import { enableCache } from '../middlewares/cache.middleware';
  *     Cars:
  *       type: array
  *       items:
- *         $ref:'#/components/schemas/car'
+ *         $ref: '#/components/schemas/Car'
  *       examples:
  *         - id: 1
  *           createdAt: 2023-11-10T14:06:00.221Z

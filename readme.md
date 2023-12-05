@@ -2,6 +2,8 @@
 
 This project contains a simple Express API, allowing for the creation of an account and manipulation of garages and cars.
 
+This project is evolving.
+
 ## Environment Variables
 
 To make this project work, you will need to add environment variables in a .env file at the root of the project. You will find an example in the source files containing the references to be specified.
